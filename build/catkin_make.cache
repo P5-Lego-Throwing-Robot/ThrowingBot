@@ -1,2 +1,0 @@
-lego_throw
--DCATKIN_DEVEL_PREFIX=/home/bspetersson/Documents/P5/ThrowingBot/devel -DCMAKE_INSTALL_PREFIX=/home/bspetersson/Documents/P5/ThrowingBot/install -G Unix Makefiles

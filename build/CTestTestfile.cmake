@@ -1,8 +1,0 @@
-# CMake generated Testfile for 
-# Source directory: /home/bspetersson/Documents/P5/ThrowingBot/src
-# Build directory: /home/bspetersson/Documents/P5/ThrowingBot/build
-# 
-# This file includes the relevant testing commands required for 
-# testing this directory and lists subdirectories to be tested as well.
-subdirs("gtest")
-subdirs("lego_throw")

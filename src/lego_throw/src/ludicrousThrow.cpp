@@ -7,13 +7,13 @@
 
 ros::Publisher gripper_pub;
 
-double goal_position[3] = {0.0, 2.0, -0.717}; // goal position in meters from base frame
+double goal_position[3] = {0.0, 1.5, 0.05}; // goal position in meters from base frame
 double throwing_angle = (M_PI*3.0)/16; // The angle to throw in radians
 double rotation_velocity = 2.0; // radians/sec rotation of object when throwing velocity is 1.0
 double acceleration_time = 1.5; // Time it takes to accelerate from joint_position_start to joint_position_throw when throwing velocity = 1.0
 double deceleration_time = 4.0; // Time it takes to decelerate from joint_position_throw to joint_position_end when throwing velocity = 1.0
-int acceleration_waypoints = 20; // Number of waypoints in the acceleration phase
-int deceleration_waypoints = 20; // Number of waypoints in the deceleration phase
+int acceleration_waypoints = 100; // Number of waypoints in the acceleration phase
+int deceleration_waypoints = 100; // Number of waypoints in the deceleration phase
 double return_to_start_acceleration_scale = 0.1;
 
 // Start, throw and end positions in joint space. radians
@@ -256,13 +256,23 @@ void throw_to(double position[3]) {
     // throw to object 
     move_group.asyncExecute(trajectory);
 
-    ros::Rate loop_rate(1/(acceleration_time / velocity));
-    loop_rate.sleep();
+    ros::Duration((acceleration_time / velocity) + 0.02).sleep();
 
     ROS_INFO("time: %f", acceleration_time / velocity);
     ROS_INFO("velocity: %f", velocity);
 
+
+
     set_gripper_state(true);
+
+    std::vector<double> joint_values = move_group.getCurrentJointValues();
+    ROS_INFO("J1: %f - %f", joint_values[0], joint_position_throw[0]);
+    ROS_INFO("J2: %f - %f", joint_values[1], joint_position_throw[1]);
+    ROS_INFO("J3: %f - %f", joint_values[2], joint_position_throw[2]);
+    ROS_INFO("J4: %f - %f", joint_values[3], joint_position_throw[3]);
+    ROS_INFO("J5: %f - %f", joint_values[4], joint_position_throw[4]);
+    ROS_INFO("J6: %f - %f", joint_values[5], joint_position_throw[5]);
+
     ros::spinOnce();
 }
 
@@ -275,13 +285,15 @@ int main(int argc, char** argv) {
     ros::NodeHandle node_handle;
     gripper_pub = node_handle.advertise<std_msgs::UInt16>("button_press", 1000);
 
+
     try {
-        throw_to(goal_position);
+        for (int i = 0; i < 3; i++) {
+            throw_to(goal_position);
         
-        ros::Rate loop_rate(1.0);
-        loop_rate.sleep();
+            ros::Duration(3.0).sleep();
         
-        set_gripper_state(false);
+            set_gripper_state(false);
+        }
     } catch(std::string error) {
         ROS_ERROR("error: %s", error.c_str());
     }

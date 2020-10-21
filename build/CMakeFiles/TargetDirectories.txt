@@ -40,6 +40,7 @@
 /home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/CMakeFiles/install.dir
 /home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/CMakeFiles/list_install_components.dir
 /home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/CMakeFiles/test.dir
+/home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/CMakeFiles/ludicrousThrow.dir
 /home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/CMakeFiles/graph_msgs_generate_messages_nodejs.dir
 /home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/CMakeFiles/graph_msgs_generate_messages_cpp.dir
 /home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/CMakeFiles/std_srvs_generate_messages_py.dir

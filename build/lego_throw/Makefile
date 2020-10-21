@@ -168,6 +168,21 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+lego_throw/CMakeFiles/ludicrousThrow.dir/rule:
+	cd /home/bspetersson/Documents/P5/ThrowingBot/build && $(MAKE) -f CMakeFiles/Makefile2 lego_throw/CMakeFiles/ludicrousThrow.dir/rule
+.PHONY : lego_throw/CMakeFiles/ludicrousThrow.dir/rule
+
+# Convenience name for target.
+ludicrousThrow: lego_throw/CMakeFiles/ludicrousThrow.dir/rule
+
+.PHONY : ludicrousThrow
+
+# fast build rule for target.
+ludicrousThrow/fast:
+	cd /home/bspetersson/Documents/P5/ThrowingBot/build && $(MAKE) -f lego_throw/CMakeFiles/ludicrousThrow.dir/build.make lego_throw/CMakeFiles/ludicrousThrow.dir/build
+.PHONY : ludicrousThrow/fast
+
+# Convenience name for target.
 lego_throw/CMakeFiles/graph_msgs_generate_messages_nodejs.dir/rule:
 	cd /home/bspetersson/Documents/P5/ThrowingBot/build && $(MAKE) -f CMakeFiles/Makefile2 lego_throw/CMakeFiles/graph_msgs_generate_messages_nodejs.dir/rule
 .PHONY : lego_throw/CMakeFiles/graph_msgs_generate_messages_nodejs.dir/rule
@@ -1562,6 +1577,33 @@ tf_generate_messages_cpp/fast:
 	cd /home/bspetersson/Documents/P5/ThrowingBot/build && $(MAKE) -f lego_throw/CMakeFiles/tf_generate_messages_cpp.dir/build.make lego_throw/CMakeFiles/tf_generate_messages_cpp.dir/build
 .PHONY : tf_generate_messages_cpp/fast
 
+src/ludicrousThrow.o: src/ludicrousThrow.cpp.o
+
+.PHONY : src/ludicrousThrow.o
+
+# target to build an object file
+src/ludicrousThrow.cpp.o:
+	cd /home/bspetersson/Documents/P5/ThrowingBot/build && $(MAKE) -f lego_throw/CMakeFiles/ludicrousThrow.dir/build.make lego_throw/CMakeFiles/ludicrousThrow.dir/src/ludicrousThrow.cpp.o
+.PHONY : src/ludicrousThrow.cpp.o
+
+src/ludicrousThrow.i: src/ludicrousThrow.cpp.i
+
+.PHONY : src/ludicrousThrow.i
+
+# target to preprocess a source file
+src/ludicrousThrow.cpp.i:
+	cd /home/bspetersson/Documents/P5/ThrowingBot/build && $(MAKE) -f lego_throw/CMakeFiles/ludicrousThrow.dir/build.make lego_throw/CMakeFiles/ludicrousThrow.dir/src/ludicrousThrow.cpp.i
+.PHONY : src/ludicrousThrow.cpp.i
+
+src/ludicrousThrow.s: src/ludicrousThrow.cpp.s
+
+.PHONY : src/ludicrousThrow.s
+
+# target to generate assembly for a file
+src/ludicrousThrow.cpp.s:
+	cd /home/bspetersson/Documents/P5/ThrowingBot/build && $(MAKE) -f lego_throw/CMakeFiles/ludicrousThrow.dir/build.make lego_throw/CMakeFiles/ludicrousThrow.dir/src/ludicrousThrow.cpp.s
+.PHONY : src/ludicrousThrow.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -1573,6 +1615,7 @@ help:
 	@echo "... install"
 	@echo "... list_install_components"
 	@echo "... test"
+	@echo "... ludicrousThrow"
 	@echo "... graph_msgs_generate_messages_nodejs"
 	@echo "... graph_msgs_generate_messages_cpp"
 	@echo "... std_srvs_generate_messages_py"
@@ -1668,6 +1711,9 @@ help:
 	@echo "... graph_msgs_generate_messages_py"
 	@echo "... actionlib_generate_messages_nodejs"
 	@echo "... tf_generate_messages_cpp"
+	@echo "... src/ludicrousThrow.o"
+	@echo "... src/ludicrousThrow.i"
+	@echo "... src/ludicrousThrow.s"
 .PHONY : help
 
 

@@ -408,11 +408,12 @@ clean: gtest/googlemock/gtest/CMakeFiles/gtest.dir/clean
 # Directory level rules for directory lego_throw
 
 # Convenience name for "all" pass in the directory.
-lego_throw/all:
+lego_throw/all: lego_throw/CMakeFiles/ludicrousThrow.dir/all
 
 .PHONY : lego_throw/all
 
 # Convenience name for "clean" pass in the directory.
+lego_throw/clean: lego_throw/CMakeFiles/ludicrousThrow.dir/clean
 lego_throw/clean: lego_throw/CMakeFiles/graph_msgs_generate_messages_nodejs.dir/clean
 lego_throw/clean: lego_throw/CMakeFiles/graph_msgs_generate_messages_cpp.dir/clean
 lego_throw/clean: lego_throw/CMakeFiles/std_srvs_generate_messages_py.dir/clean
@@ -513,6 +514,43 @@ lego_throw/clean: lego_throw/CMakeFiles/tf_generate_messages_cpp.dir/clean
 lego_throw/preinstall:
 
 .PHONY : lego_throw/preinstall
+
+#=============================================================================
+# Target rules for target lego_throw/CMakeFiles/ludicrousThrow.dir
+
+# All Build rule for target.
+lego_throw/CMakeFiles/ludicrousThrow.dir/all:
+	$(MAKE) -f lego_throw/CMakeFiles/ludicrousThrow.dir/build.make lego_throw/CMakeFiles/ludicrousThrow.dir/depend
+	$(MAKE) -f lego_throw/CMakeFiles/ludicrousThrow.dir/build.make lego_throw/CMakeFiles/ludicrousThrow.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/bspetersson/Documents/P5/ThrowingBot/build/CMakeFiles --progress-num=12,13 "Built target ludicrousThrow"
+.PHONY : lego_throw/CMakeFiles/ludicrousThrow.dir/all
+
+# Include target in all.
+all: lego_throw/CMakeFiles/ludicrousThrow.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+lego_throw/CMakeFiles/ludicrousThrow.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/bspetersson/Documents/P5/ThrowingBot/build/CMakeFiles 2
+	$(MAKE) -f CMakeFiles/Makefile2 lego_throw/CMakeFiles/ludicrousThrow.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/bspetersson/Documents/P5/ThrowingBot/build/CMakeFiles 0
+.PHONY : lego_throw/CMakeFiles/ludicrousThrow.dir/rule
+
+# Convenience name for target.
+ludicrousThrow: lego_throw/CMakeFiles/ludicrousThrow.dir/rule
+
+.PHONY : ludicrousThrow
+
+# clean rule for target.
+lego_throw/CMakeFiles/ludicrousThrow.dir/clean:
+	$(MAKE) -f lego_throw/CMakeFiles/ludicrousThrow.dir/build.make lego_throw/CMakeFiles/ludicrousThrow.dir/clean
+.PHONY : lego_throw/CMakeFiles/ludicrousThrow.dir/clean
+
+# clean rule for target.
+clean: lego_throw/CMakeFiles/ludicrousThrow.dir/clean
+
+.PHONY : clean
 
 #=============================================================================
 # Target rules for target lego_throw/CMakeFiles/graph_msgs_generate_messages_nodejs.dir

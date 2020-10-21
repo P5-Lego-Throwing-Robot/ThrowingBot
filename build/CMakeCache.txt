@@ -391,6 +391,12 @@ kdl_conversions_DIR:PATH=/opt/ros/melodic/share/kdl_conversions/cmake
 kdl_parser_DIR:PATH=/opt/ros/melodic/share/kdl_parser/cmake
 
 //Value Computed by CMake
+lego_throw_BINARY_DIR:STATIC=/home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw
+
+//Value Computed by CMake
+lego_throw_SOURCE_DIR:STATIC=/home/bspetersson/Documents/P5/ThrowingBot/src/lego_throw
+
+//Value Computed by CMake
 lego_throwing_BINARY_DIR:STATIC=/home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw
 
 //Value Computed by CMake

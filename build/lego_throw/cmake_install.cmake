@@ -38,17 +38,17 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/catkin_generated/installspace/lego_throwing.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/catkin_generated/installspace/lego_throw.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/lego_throwing/cmake" TYPE FILE FILES
-    "/home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/catkin_generated/installspace/lego_throwingConfig.cmake"
-    "/home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/catkin_generated/installspace/lego_throwingConfig-version.cmake"
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/lego_throw/cmake" TYPE FILE FILES
+    "/home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/catkin_generated/installspace/lego_throwConfig.cmake"
+    "/home/bspetersson/Documents/P5/ThrowingBot/build/lego_throw/catkin_generated/installspace/lego_throwConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/lego_throwing" TYPE FILE FILES "/home/bspetersson/Documents/P5/ThrowingBot/src/lego_throw/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/lego_throw" TYPE FILE FILES "/home/bspetersson/Documents/P5/ThrowingBot/src/lego_throw/package.xml")
 endif()
 

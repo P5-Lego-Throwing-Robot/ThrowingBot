@@ -285,6 +285,19 @@ gtest/fast:
 .PHONY : gtest/fast
 
 #=============================================================================
+# Target rules for targets named ludicrousThrow
+
+# Build rule for target.
+ludicrousThrow: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 ludicrousThrow
+.PHONY : ludicrousThrow
+
+# fast build rule for target.
+ludicrousThrow/fast:
+	$(MAKE) -f lego_throw/CMakeFiles/ludicrousThrow.dir/build.make lego_throw/CMakeFiles/ludicrousThrow.dir/build
+.PHONY : ludicrousThrow/fast
+
+#=============================================================================
 # Target rules for targets named graph_msgs_generate_messages_nodejs
 
 # Build rule for target.
@@ -1515,6 +1528,7 @@ help:
 	@echo "... gmock"
 	@echo "... gtest_main"
 	@echo "... gtest"
+	@echo "... ludicrousThrow"
 	@echo "... graph_msgs_generate_messages_nodejs"
 	@echo "... graph_msgs_generate_messages_cpp"
 	@echo "... std_srvs_generate_messages_py"

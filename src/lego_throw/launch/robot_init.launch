@@ -5,9 +5,9 @@
 		<arg name="kinematics_config" value="$(find lego_throw)/config/ur5_calibration.yaml"/>
 	</include>
 
-	<include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch"/>
+	<include file="$(find lego_throw)/launch/ur5_moveit_planning_execution.launch"/>
 	
-	<include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch">
+	<include file="$(find lego_throw)/launch/moveit_rviz.launch">
 		<arg name="config" default="true" />
 	</include>
 

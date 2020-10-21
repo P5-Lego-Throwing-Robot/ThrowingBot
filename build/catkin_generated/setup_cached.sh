@@ -7,7 +7,4 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/bspetersson/Documents/P5/ThrowingBot/devel:$CMAKE_PREFIX_PATH"
 export PWD='/home/bspetersson/Documents/P5/ThrowingBot/build'
-export ROSLISP_PACKAGE_DIRECTORIES="/home/bspetersson/Documents/P5/ThrowingBot/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
-export ROS_PACKAGE_PATH="/home/bspetersson/Documents/P5/ThrowingBot/src:$ROS_PACKAGE_PATH"

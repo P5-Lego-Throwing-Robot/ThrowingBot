@@ -1,0 +1,8 @@
+prefix=/home/bspetersson/Documents/P5/ThrowingBot/devel
+
+Name: lego_throwing
+Description: Description of lego_throwing
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -5,6 +5,16 @@
 #include "std_msgs/String.h"
 #include "std_msgs/UInt16.h"
 
+// C library headers
+#include <stdio.h>
+#include <string.h>
+
+// Linux headers
+#include <fcntl.h> // Contains file controls like O_RDWR
+#include <errno.h> // Error integer and strerror() function
+#include <termios.h> // Contains POSIX terminal control definitions
+#include <unistd.h> // write(), read(), close()
+
 ros::Publisher gripper_pub;
 
 double goal_position[3] = {0.0, 1.5, 0.05}; // goal position in meters from base frame
@@ -25,6 +35,7 @@ double offset = 0.109492; // end-effector offset from x-axis when J0 = 0. used i
 double g = -9.82;
 std::vector<double> zero_velocity_vector{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 const std::string PLANNING_GROUP = "manipulator";
+int serial_port = 0;
 
 
 // Finds the angle of joint one so that the goal position intersects with the throwing plane
@@ -203,8 +214,62 @@ void go_to_joint_position(std::vector<double> joint_goal) {
 }
 
 
+void configure_serial_port() {
+    // Open the serial port. Change device path as needed (currently set to an standard FTDI USB-UART cable type device)
+    serial_port = open("/dev/ttyACM0", O_RDWR);
+
+    // Create new termios struc, we call it 'tty' for convention
+    struct termios tty;
+
+    // Read in existing settings, and handle any error
+    if(tcgetattr(serial_port, &tty) != 0) {
+        printf("Error %i from tcgetattr: %s\n", errno, strerror(errno));
+    }
+
+    tty.c_cflag &= ~PARENB; // Clear parity bit, disabling parity (most common)
+    tty.c_cflag &= ~CSTOPB; // Clear stop field, only one stop bit used in communication (most common)
+    tty.c_cflag &= ~CSIZE; // Clear all bits that set the data size 
+    tty.c_cflag |= CS8; // 8 bits per byte (most common)
+    tty.c_cflag &= ~CRTSCTS; // Disable RTS/CTS hardware flow control (most common)
+    tty.c_cflag |= CREAD | CLOCAL; // Turn on READ & ignore ctrl lines (CLOCAL = 1)
+
+    tty.c_lflag &= ~ICANON;
+    tty.c_lflag &= ~ECHO; // Disable echo
+    tty.c_lflag &= ~ECHOE; // Disable erasure
+    tty.c_lflag &= ~ECHONL; // Disable new-line echo
+    tty.c_lflag &= ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
+    tty.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL); // Disable any special handling of received bytes
+
+    tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
+    tty.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
+    // tty.c_oflag &= ~OXTABS; // Prevent conversion of tabs to spaces (NOT PRESENT ON LINUX)
+    // tty.c_oflag &= ~ONOEOT; // Prevent removal of C-d chars (0x004) in output (NOT PRESENT ON LINUX)
+
+    tty.c_cc[VTIME] = 10;    // Wait for up to 1s (10 deciseconds), returning as soon as any data is received.
+    tty.c_cc[VMIN] = 0;
+
+    // Set in/out baud rate to be 9600
+    cfsetispeed(&tty, B9600);
+    cfsetospeed(&tty, B9600);
+
+    // Save tty settings, also checking for error
+    if (tcsetattr(serial_port, TCSANOW, &tty) != 0) {
+        printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
+    }
+
+    ros::Duration(3.0).sleep();
+}
+
+
 // Change the state of the gripper
 void set_gripper_state(bool open) {
+    if (open) {
+        write(serial_port, "1", 2);
+    } else {
+        write(serial_port, "0", 2);
+    }
+    /*
     std_msgs::UInt16 button_msg;
     if (open) {
         button_msg.data = 1;
@@ -212,6 +277,7 @@ void set_gripper_state(bool open) {
         button_msg.data = 0;
     }
     gripper_pub.publish(button_msg);
+    */
 }
 
 
@@ -253,17 +319,15 @@ void throw_to(double position[3]) {
     turned_joint_position_start[0] = joint_one_angle;
     go_to_joint_position(turned_joint_position_start);
 
-    // throw to object 
+    // throw the object 
     move_group.asyncExecute(trajectory);
 
-    ros::Duration((acceleration_time / velocity) + 0.02).sleep();
-
-    ROS_INFO("time: %f", acceleration_time / velocity);
-    ROS_INFO("velocity: %f", velocity);
-
-
+    ros::Duration(acceleration_time / velocity).sleep();
 
     set_gripper_state(true);
+
+    ROS_INFO("time: %f", (acceleration_time / velocity));
+    ROS_INFO("velocity: %f", velocity);
 
     std::vector<double> joint_values = move_group.getCurrentJointValues();
     ROS_INFO("J1: %f - %f", joint_values[0], joint_position_throw[0]);
@@ -282,18 +346,19 @@ int main(int argc, char** argv) {
     ros::AsyncSpinner spinner(1);
     spinner.start();
 
+    configure_serial_port();
+    
     ros::NodeHandle node_handle;
     gripper_pub = node_handle.advertise<std_msgs::UInt16>("button_press", 1000);
 
-
     try {
-        for (int i = 0; i < 3; i++) {
-            throw_to(goal_position);
+        throw_to(goal_position);
         
-            ros::Duration(3.0).sleep();
+        ros::Duration(3.0).sleep();
         
-            set_gripper_state(false);
-        }
+        set_gripper_state(false);
+
+        close(serial_port);
     } catch(std::string error) {
         ROS_ERROR("error: %s", error.c_str());
     }

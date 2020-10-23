@@ -4,6 +4,7 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include "std_msgs/String.h"
 #include "std_msgs/UInt16.h"
+#include "geometry_msgs/Vector3.h"
 
 // C library headers
 #include <stdio.h>
@@ -17,7 +18,7 @@
 
 ros::Publisher gripper_pub;
 
-double goal_position[3] = {0.0, 1.5, 0.05}; // goal position in meters from base frame
+double goal_position[3] = {0.0, 0.0, 0.0}; // goal position in meters from base frame
 double throwing_angle = (M_PI*3.0)/16; // The angle to throw in radians
 double rotation_velocity = 2.0; // radians/sec rotation of object when throwing velocity is 1.0
 double acceleration_time = 1.5; // Time it takes to accelerate from joint_position_start to joint_position_throw when throwing velocity = 1.0
@@ -330,27 +331,15 @@ void throw_to(double position[3]) {
     ROS_INFO("velocity: %f", velocity);
 
     std::vector<double> joint_values = move_group.getCurrentJointValues();
-    ROS_INFO("J1: %f - %f", joint_values[0], joint_position_throw[0]);
-    ROS_INFO("J2: %f - %f", joint_values[1], joint_position_throw[1]);
-    ROS_INFO("J3: %f - %f", joint_values[2], joint_position_throw[2]);
-    ROS_INFO("J4: %f - %f", joint_values[3], joint_position_throw[3]);
-    ROS_INFO("J5: %f - %f", joint_values[4], joint_position_throw[4]);
-    ROS_INFO("J6: %f - %f", joint_values[5], joint_position_throw[5]);
 
     ros::spinOnce();
 }
 
 
-int main(int argc, char** argv) {
-    ros::init(argc, argv, "ludicrous_throw");
-    ros::AsyncSpinner spinner(1);
-    spinner.start();
-
-    configure_serial_port();
-    
-    ros::NodeHandle node_handle;
-    gripper_pub = node_handle.advertise<std_msgs::UInt16>("button_press", 1000);
-
+void goal_position_callback(const geometry_msgs::Vector3::ConstPtr& msg) {
+    goal_position[0] = msg->x;
+    goal_position[1] = msg->y;
+    goal_position[2] = msg->z;
     try {
         throw_to(goal_position);
         
@@ -362,6 +351,34 @@ int main(int argc, char** argv) {
     } catch(std::string error) {
         ROS_ERROR("error: %s", error.c_str());
     }
+}
+
+
+int main(int argc, char** argv) {
+    ros::init(argc, argv, "ludicrous_throw");
+    ros::AsyncSpinner spinner(1);
+
+    configure_serial_port();
+    
+    ros::NodeHandle node_handle;
+    ros::Subscriber box_position_subscriber = node_handle.subscribe("box_position", 1000, goal_position_callback);
+
+    spinner.start();
+    ros::waitForShutdown();
+
+/*
+    try {
+        throw_to(goal_position);
+        
+        ros::Duration(3.0).sleep();
+        
+        set_gripper_state(false);
+
+        close(serial_port);
+    } catch(std::string error) {
+        ROS_ERROR("error: %s", error.c_str());
+    }
+    */
 
     return 0;
 }

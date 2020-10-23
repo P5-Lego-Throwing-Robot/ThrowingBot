@@ -210,3 +210,6 @@ include_directories(
 
 add_executable(ludicrousThrow src/ludicrousThrow.cpp)
 target_link_libraries(ludicrousThrow ${catkin_LIBRARIES})
+
+add_executable(testing src/testing.cpp)
+target_link_libraries(testing ${catkin_LIBRARIES})

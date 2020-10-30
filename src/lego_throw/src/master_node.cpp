@@ -88,7 +88,7 @@ int main(int argc, char **argv)
             }
         }
    
-        std::cout<<"PIK"<<std::endl;
+        std::cout << "TEST" << std::endl;
         
         ros::spinOnce();
         ros::Rate(10).sleep();

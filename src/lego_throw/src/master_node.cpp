@@ -49,22 +49,22 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "master_node");
     ros::NodeHandle node_handle;
 
-    // Service client request: 
-    ros::ServiceClientOptions ops;
-    ops.init ("pick_options",true);
-    ops.allow_concurrent_callbacks = true;
-    ros::ServiceClient = node_handle.ros::ServiceClient(ops);
-
-    
-    //ros::ServiceClient client = node_handle.serviceClient<lego_throw::pick_option>("pick_option");
-
-    // Subscriber:
-    ros::Subscriber box_info = node_handle.subscribe("box_info", 1, box_id_callback);
-    
     // AsyncSpinner:
     ros::AsyncSpinner spinner(0);
     spinner.start();
 
+    // Service client request: 
+    //ros::ServiceClientOptions ops;
+    //ops.init ("pick_options",true);
+    //ops.allow_concurrent_callbacks = true;
+    //ros::ServiceClient = node_handle.ros::ServiceClient(ops);
+
+    ros::ServiceClient client = node_handle.serviceClient<lego_throw::pick_option>("pick_option");
+    client.waitForExistence();
+
+    // Subscriber:
+    ros::Subscriber box_info = node_handle.subscribe("box_info", 1, box_id_callback);
+    
     // Loading orders from file:
     load_json(ros::package::getPath("lego_throw") + ("/orders/orders.json"), order);
 

@@ -60,11 +60,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+ add_service_files(
+   FILES
+   pick_option.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -74,10 +73,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -219,3 +218,6 @@ target_link_libraries(testing ${catkin_LIBRARIES})
 
 add_executable(master_node src/master_node.cpp)
 target_link_libraries(master_node ${catkin_LIBRARIES} nlohmann_json)
+
+add_executable(picking_node src/picking_node.cpp)
+target_link_libraries(picking_node ${catkin_LIBRARIES})

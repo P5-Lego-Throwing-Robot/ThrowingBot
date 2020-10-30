@@ -3,7 +3,9 @@ project(lego_throw)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
+set(JSON_BuildTests OFF CACHE INTERNAL "")
 
+add_subdirectory(include/json_develop)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -14,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_ros_planning_interface
   moveit_visual_tools
   message_generation
+  
 )
 
 ## System dependencies are found with CMake's conventions
@@ -213,3 +216,6 @@ target_link_libraries(ludicrousThrow ${catkin_LIBRARIES})
 
 add_executable(testing src/testing.cpp)
 target_link_libraries(testing ${catkin_LIBRARIES})
+
+add_executable(master_node src/master_node.cpp)
+target_link_libraries(master_node ${catkin_LIBRARIES} nlohmann_json)

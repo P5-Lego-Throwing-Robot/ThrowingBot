@@ -9,27 +9,40 @@
 #include <actionlib/client/simple_action_client.h>
 #include <lego_throw/camera.h>
 
+struct box_id {
+    std::string box_id;
+    float x;
+    float y;
+    float z;
+};
+
 // Global variables: 
 nlohmann::json order;
-std::vector<std::string> box_id_queue; 
-float x, y, z;
+std::vector<box_id> box_id_queue; 
+
 
 // Callback function:
 bool box_id_callback(lego_throw::camera::Request  &req,
                      lego_throw::camera::Response &res){
         
-        std::string ID = req.data;
-        x = req.x;
-        y = req.y;
-        z = req.z;
+        box_id temp_box;
 
-       if(order.contains(ID)){
-            std::cout << ID << " was added to the processing queue." << "\n";
-            box_id_queue.push_back(ID);
+        temp_box.box_id = req.data;
+        temp_box.x = req.x;
+        temp_box.y = req.y;
+        temp_box.z = req.z;
+
+        if(order.contains(temp_box.box_id))
+        {
+            std::cout << temp_box.box_id << " was added to the processing queue." << "\n";
+            box_id_queue.push_back(temp_box);
         }
-        else {
-            std::cout << ID <<" was not found in the database." << "\n";
+        
+        else 
+        {
+            std::cout << temp_box.box_id <<" was not found in the database." << "\n";
         }
+
         res.status = 0;
         return true;
 }
@@ -88,12 +101,12 @@ int main(int argc, char **argv)
             // Setting new goals:
             if (state == 0) 
             {
-                std::cout << "---------------------\nSTARTING TO PROCESS -> " << box_id_queue[0] << std::endl;
+                std::cout << "---------------------\nSTARTING TO PROCESS -> " << box_id_queue[0].box_id << std::endl;
 
-                pick_option_goal.option = order[box_id_queue[0]][0];
-                throwing_goal.x = x;
-                throwing_goal.y = y;
-                throwing_goal.z = z;
+                pick_option_goal.option = order[box_id_queue[0].box_id][0];
+                throwing_goal.x = box_id_queue[0].x;
+                throwing_goal.y = box_id_queue[0].y;
+                throwing_goal.z = box_id_queue[0].z;
 
                 std::cout << "Order: " << pick_option_goal.option << ", X: " << throwing_goal.x << " , Y: " << throwing_goal.y << " , Z: " << throwing_goal.z << std::endl;
 
@@ -139,7 +152,7 @@ int main(int argc, char **argv)
             {
  
                 // Done processing:
-                std::cout << "DONE PROCESSING -> " << box_id_queue[0] << "\n---------------------" << std::endl;
+                std::cout << "DONE PROCESSING -> " << box_id_queue[0].box_id << "\n---------------------" << std::endl;
 
                 // Erasing first element in box_id:
                 box_id_queue.erase(box_id_queue.begin());

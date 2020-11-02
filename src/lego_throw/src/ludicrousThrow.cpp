@@ -6,6 +6,8 @@
 #include "std_msgs/UInt16.h"
 #include "geometry_msgs/Vector3.h"
 #include "ros/callback_queue.h"
+#include <actionlib/server/simple_action_server.h>
+#include <lego_throw/throwingAction.h>
 
 // C library headers
 #include <stdio.h>
@@ -356,11 +358,23 @@ void goal_position_callback(const geometry_msgs::Vector3::ConstPtr& msg) {
     }
 }
 
+
+void execute_throw(const lego_throw::throwingGoalConstPtr& goal, actionlib::SimpleActionServer<lego_throw::throwingAction>* action_server) {
+  // Do lots of awesome groundbreaking robot stuff here
+  ROS_INFO("something happend. SUCCESS!!!!!");
+  action_server->setSucceeded();
+}
+
+
 int main(int argc, char** argv) {
     ros::init(argc, argv, "ludicrous_throw");
     ros::AsyncSpinner spinner(4);
 
     ros::NodeHandle node_handle;
+
+    actionlib::SimpleActionServer<lego_throw::throwingAction> server(node_handle, "throwing", boost::bind(&execute_throw, _1, &server), false);
+    server.start();
+
     ros::Subscriber box_position_subscriber = node_handle.subscribe("box_position", 1, goal_position_callback);
     spinner.start();
 

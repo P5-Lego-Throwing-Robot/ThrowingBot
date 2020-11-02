@@ -77,6 +77,7 @@ add_action_files(
   DIRECTORY
   FILES
   pick_option.action
+  throwing.action
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -120,6 +121,7 @@ catkin_package(
 #  LIBRARIES lego_throw
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
+  CATKIN_DEPENDS actionlib_msgs
 )
 
 ###########

@@ -61,9 +61,12 @@ int main(int argc, char **argv)
     // Loading orders from file:
     load_json(ros::package::getPath("lego_throw") + ("/orders/orders.json"), order);
 
+    // Variables for controlling the flow of the code:
     bool processing = false;
     bool picking_goal_sent = false;
     bool throwing_goal_sent = false;
+    bool picking_done = false;
+    bool throwing_done = false;
     lego_throw::pick_optionGoal pick_option_goal;
 
     while(ros::ok()) 
@@ -75,26 +78,59 @@ int main(int argc, char **argv)
             if (processing == false) 
             {
                 processing = true;
-                //lego_throw::pick_option srv;
-                //srv.request.option = order[box_id_queue[0]][0];
+
                 pick_option_goal.option = order[box_id_queue[0]][0];
             }
             
-            
+            // Sending picking goal if one has not been set before:
             if (picking_goal_sent == false) 
             {
                 picking_client.sendGoal(pick_option_goal);
                 picking_goal_sent = true;
             }
-            
+
+            // Checking to see if set picking goal is completed:
             if (picking_goal_sent == true && picking_client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+            {
+                picking_done = true;
+
+                // DELETE:
+                // Done processing:
+                std::cout << "Done processing " << box_id_queue[0] << std::endl;
+                box_id_queue.erase(box_id_queue.begin());
+                processing = false;
+                picking_goal_sent = false;
+                throwing_goal_sent = false;
+                picking_done = false;
+                throwing_done = false;
+            }
+
+            /*
+            // If picking goal is complete a throwing goal is sent:
+            if (picking_done == true && throwing_goal_sent == false) 
+            {
+                throwing_goal_sent == true;
+            }
+
+            
+             // Checking to see if set picking goal is completed:
+            if (throwing_goal_sent == true && throwing_client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+            {
+                picking_done = true;
+            }
+
+            if (picking_done == true && throwing_done == true)
             {
                 // Done processing:
                 std::cout << "Done processing " << box_id_queue[0] << std::endl;
                 box_id_queue.erase(box_id_queue.begin());
                 processing = false;
                 picking_goal_sent = false;
+                throwing_goal_sent = false;
+                picking_done = false;
+                throwing_done = false;
             }
+            */
         }
    
         ROS_INFO("TEST");

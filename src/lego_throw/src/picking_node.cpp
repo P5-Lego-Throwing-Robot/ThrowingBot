@@ -1,19 +1,7 @@
 #include <ros/ros.h>
-#include <lego_throw/pick_option.h>
 #include <lego_throw/pick_optionAction.h>
 #include <actionlib/server/simple_action_server.h>
 #include <iostream>
-
-bool service_callback(lego_throw::pick_option::Request &req, lego_throw::pick_option::Response &res)
-{
-    std::cout << "Requesting the following item to be picked up: " << req.option << std::endl;
-
-    ros::Duration(5.0).sleep();
-
-    res.state = true;
-
-    return true;
-}
 
 void execute(const lego_throw::pick_optionGoalConstPtr& goal, actionlib::SimpleActionServer<lego_throw::pick_optionAction>* as) 
 {

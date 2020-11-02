@@ -21,8 +21,6 @@ void execute(const lego_throw::pick_optionGoalConstPtr& goal, actionlib::SimpleA
 
     std::cout << "The following option was requested: " << option << std::endl;
 
-    ros::Duration(5.0).sleep();
-
     as->setSucceeded();
 }
 

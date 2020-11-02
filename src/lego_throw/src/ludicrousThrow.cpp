@@ -361,8 +361,28 @@ void goal_position_callback(const geometry_msgs::Vector3::ConstPtr& msg) {
 
 void execute_throw(const lego_throw::throwingGoalConstPtr& goal, actionlib::SimpleActionServer<lego_throw::throwingAction>* action_server) {
   // Do lots of awesome groundbreaking robot stuff here
+
+    goal_position[0] = goal->x;
+    goal_position[1] = goal->y;
+    goal_position[2] = goal->z;
+
+    ROS_INFO("pos x: %f", goal_position[0]);
+    ROS_INFO("pos y: %f", goal_position[1]);
+    ROS_INFO("pos z: %f", goal_position[2]);
+
+    try {
+        throw_to(goal_position);
+        
+        ros::Duration(3.0).sleep();
+        
+        set_gripper_state(false);
+    } catch(std::string error) {
+        ROS_ERROR("error: %s", error.c_str());
+    }
   ROS_INFO("something happend. SUCCESS!!!!!");
   action_server->setSucceeded();
+
+
 }
 
 

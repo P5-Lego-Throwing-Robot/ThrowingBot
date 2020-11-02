@@ -12,16 +12,12 @@ void execute(const lego_throw::pick_optionGoalConstPtr& goal, actionlib::SimpleA
     as->setSucceeded();
 }
 
-
-
 int main(int argc, char** argv)
 {
-
     ros::init(argc, argv, "picking_node");
     ros::NodeHandle node_handle;
 
-    //ros::ServiceServer service = node_handle.advertiseService("pick_option", service_callback);
-
+    // Action server:
     actionlib::SimpleActionServer<lego_throw::pick_optionAction> server(node_handle, "pick_option", boost::bind(&execute, _1, &server), false);
     server.start();
 

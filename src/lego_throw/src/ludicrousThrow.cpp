@@ -5,6 +5,7 @@
 #include "std_msgs/String.h"
 #include "std_msgs/UInt16.h"
 #include "geometry_msgs/Vector3.h"
+#include "ros/callback_queue.h"
 
 // C library headers
 #include <stdio.h>
@@ -16,9 +17,7 @@
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h> // write(), read(), close()
 
-ros::Publisher gripper_pub;
-
-double goal_position[3] = {0.0, 0.0, 0.0}; // goal position in meters from base frame
+double goal_position[3] = {0.1, 1.3, 0.05}; // goal position in meters from base frame
 double throwing_angle = (M_PI*3.0)/16; // The angle to throw in radians
 double rotation_velocity = 2.0; // radians/sec rotation of object when throwing velocity is 1.0
 double acceleration_time = 1.5; // Time it takes to accelerate from joint_position_start to joint_position_throw when throwing velocity = 1.0
@@ -32,8 +31,9 @@ std::vector<double> joint_position_start{0.0, -(M_PI*13)/16, -(M_PI*6)/16, -(M_P
 std::vector<double> joint_position_throw{0.0, -(M_PI*10)/16, -(M_PI*3)/16, (M_PI*1)/16, M_PI/2, 0.0};
 std::vector<double> joint_position_end{0.0, -(M_PI*10)/16, -(M_PI*3)/16, (M_PI*1)/16, M_PI/2, 0.0};
 
-double offset = 0.109492; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
-double g = -9.82;
+//double offset = 0.109492; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
+double offset = 0.1053; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
+double g = -9.816;
 std::vector<double> zero_velocity_vector{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 const std::string PLANNING_GROUP = "manipulator";
 int serial_port = 0;
@@ -250,9 +250,9 @@ void configure_serial_port() {
     tty.c_cc[VTIME] = 10;    // Wait for up to 1s (10 deciseconds), returning as soon as any data is received.
     tty.c_cc[VMIN] = 0;
 
-    // Set in/out baud rate to be 9600
-    cfsetispeed(&tty, B9600);
-    cfsetospeed(&tty, B9600);
+    // Set in/out baud rate to be 115200
+    cfsetispeed(&tty, B115200);
+    cfsetospeed(&tty, B115200);
 
     // Save tty settings, also checking for error
     if (tcsetattr(serial_port, TCSANOW, &tty) != 0) {
@@ -323,7 +323,8 @@ void throw_to(double position[3]) {
     // throw the object 
     move_group.asyncExecute(trajectory);
 
-    ros::Duration(acceleration_time / velocity).sleep();
+    //ros::Duration((acceleration_time / velocity) * 1.08).sleep();
+    ros::Duration((acceleration_time / velocity) - 0.02).sleep();
 
     set_gripper_state(true);
 
@@ -335,36 +336,35 @@ void throw_to(double position[3]) {
     ros::spinOnce();
 }
 
-
 void goal_position_callback(const geometry_msgs::Vector3::ConstPtr& msg) {
     goal_position[0] = msg->x;
     goal_position[1] = msg->y;
     goal_position[2] = msg->z;
+
+    ROS_INFO("pos x: %f", goal_position[0]);
+    ROS_INFO("pos y: %f", goal_position[1]);
+    ROS_INFO("pos z: %f", goal_position[2]);
+
     try {
         throw_to(goal_position);
         
         ros::Duration(3.0).sleep();
         
         set_gripper_state(false);
-
-        close(serial_port);
     } catch(std::string error) {
         ROS_ERROR("error: %s", error.c_str());
     }
 }
 
-
 int main(int argc, char** argv) {
     ros::init(argc, argv, "ludicrous_throw");
-    ros::AsyncSpinner spinner(1);
+    ros::AsyncSpinner spinner(4);
+
+    ros::NodeHandle node_handle;
+    ros::Subscriber box_position_subscriber = node_handle.subscribe("box_position", 1, goal_position_callback);
+    spinner.start();
 
     configure_serial_port();
-    
-    ros::NodeHandle node_handle;
-    ros::Subscriber box_position_subscriber = node_handle.subscribe("box_position", 1000, goal_position_callback);
-
-    spinner.start();
-    ros::waitForShutdown();
 
 /*
     try {
@@ -373,12 +373,14 @@ int main(int argc, char** argv) {
         ros::Duration(3.0).sleep();
         
         set_gripper_state(false);
-
-        close(serial_port);
     } catch(std::string error) {
         ROS_ERROR("error: %s", error.c_str());
     }
     */
+
+    ros::waitForShutdown();
+
+    close(serial_port);
 
     return 0;
 }

@@ -1,0 +1,10 @@
+#throwing goal
+int32 x
+int32 y
+int32 z
+---
+#seconds remaining
+time remaining_time
+---
+#error code
+int8 error_code

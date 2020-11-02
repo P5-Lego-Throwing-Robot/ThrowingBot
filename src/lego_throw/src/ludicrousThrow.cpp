@@ -6,6 +6,8 @@
 #include "std_msgs/UInt16.h"
 #include "geometry_msgs/Vector3.h"
 #include "ros/callback_queue.h"
+#include <actionlib/server/simple_action_server.h>
+#include <lego_throw/throwingAction.h>
 
 // C library headers
 #include <stdio.h>
@@ -361,6 +363,9 @@ int main(int argc, char** argv) {
     ros::AsyncSpinner spinner(4);
 
     ros::NodeHandle node_handle;
+
+    actionlib::SimpleActionServer<lego_throw::throwingAction> action_server;
+
     ros::Subscriber box_position_subscriber = node_handle.subscribe("box_position", 1, goal_position_callback);
     spinner.start();
 

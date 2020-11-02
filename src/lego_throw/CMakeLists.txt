@@ -71,6 +71,7 @@ add_action_files(
   DIRECTORY
   FILES
   pick_option.action
+  throwing.action
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -114,6 +115,7 @@ catkin_package(
 #  LIBRARIES lego_throw
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
+  CATKIN_DEPENDS actionlib_msgs
 )
 
 ###########
@@ -214,9 +216,6 @@ include_directories(
 
 add_executable(ludicrousThrow src/ludicrousThrow.cpp)
 target_link_libraries(ludicrousThrow ${catkin_LIBRARIES})
-
-add_executable(testing src/testing.cpp)
-target_link_libraries(testing ${catkin_LIBRARIES})
 
 add_executable(master_node src/master_node.cpp)
 target_link_libraries(master_node ${catkin_LIBRARIES} nlohmann_json)

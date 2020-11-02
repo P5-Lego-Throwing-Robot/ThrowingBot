@@ -7,23 +7,26 @@
 #include <lego_throw/pick_option.h>
 #include <lego_throw/pick_optionAction.h>
 #include <actionlib/client/simple_action_client.h>
+#include <lego_throw/camera.h>
 
 // Global variables: 
 nlohmann::json order;
 std::vector<std::string> box_id_queue; 
 
 // Callback function:
-void box_id_callback(const std_msgs::String::ConstPtr& msg){
+bool box_id_callback(lego_throw::camera::Request  &req,
+                     lego_throw::camera::Response &res){
         
-        std::string ID = msg->data;
-
-        if(order.contains(ID)){
+        std::string ID = req.data;
+       if(order.contains(ID)){
             std::cout << ID << " was added to the processing queue." << "\n";
             box_id_queue.push_back(ID);
         }
         else {
             std::cout << ID <<" was not found in the database." << "\n";
         }
+        res.status = 0;
+        return true;
 }
 
 
@@ -51,12 +54,14 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "master_node");
     ros::NodeHandle node_handle;
 
+     ros::ServiceServer service = node_handle.advertiseService("camera", box_id_callback);
+
     // Picking action client:
     actionlib::SimpleActionClient<lego_throw::pick_optionAction> picking_client("pick_option", true);
     picking_client.waitForServer();
 
     // Subscriber:
-    ros::Subscriber box_info = node_handle.subscribe("box_info", 1, box_id_callback);
+    //ros::Subscriber box_info = node_handle.subscribe("box_info", 1, box_id_callback);
     
     // Loading orders from file:
     load_json(ros::package::getPath("lego_throw") + ("/orders/orders.json"), order);

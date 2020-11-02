@@ -1,0 +1,8 @@
+# Define the goal
+string option  # Specify which option should be picked up
+---
+# Define the result
+bool state # True if the option was picked up
+---
+# Define a feedback message
+float32 percent_complete

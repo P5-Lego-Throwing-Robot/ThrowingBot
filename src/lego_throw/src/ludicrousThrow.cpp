@@ -272,15 +272,6 @@ void set_gripper_state(bool open) {
     } else {
         write(serial_port, "0", 2);
     }
-    /*
-    std_msgs::UInt16 button_msg;
-    if (open) {
-        button_msg.data = 1;
-    } else {
-        button_msg.data = 0;
-    }
-    gripper_pub.publish(button_msg);
-    */
 }
 
 
@@ -338,29 +329,19 @@ void throw_to(double position[3]) {
     ros::spinOnce();
 }
 
-void goal_position_callback(const geometry_msgs::Vector3::ConstPtr& msg) {
-    goal_position[0] = msg->x;
-    goal_position[1] = msg->y;
-    goal_position[2] = msg->z;
-
-    ROS_INFO("pos x: %f", goal_position[0]);
-    ROS_INFO("pos y: %f", goal_position[1]);
-    ROS_INFO("pos z: %f", goal_position[2]);
-
-    try {
-        throw_to(goal_position);
-        
-        ros::Duration(3.0).sleep();
-        
+void gripper_state_callback(const std_msgs::UInt16::ConstPtr& msg) {
+    if (msg->data == 1) {
+        set_gripper_state(true);
+    } else {
         set_gripper_state(false);
-    } catch(std::string error) {
-        ROS_ERROR("error: %s", error.c_str());
     }
 }
 
 
 void execute_throw(const lego_throw::throwingGoalConstPtr& goal, actionlib::SimpleActionServer<lego_throw::throwingAction>* action_server) {
-  // Do lots of awesome groundbreaking robot stuff here
+    // Do lots of awesome groundbreaking robot stuff here
+
+    ROS_INFO("something happend. SUCCESS!!!!!");
 
     goal_position[0] = goal->x;
     goal_position[1] = goal->y;
@@ -379,10 +360,7 @@ void execute_throw(const lego_throw::throwingGoalConstPtr& goal, actionlib::Simp
     } catch(std::string error) {
         ROS_ERROR("error: %s", error.c_str());
     }
-  ROS_INFO("something happend. SUCCESS!!!!!");
-  action_server->setSucceeded();
-
-
+    action_server->setSucceeded();
 }
 
 
@@ -395,7 +373,8 @@ int main(int argc, char** argv) {
     actionlib::SimpleActionServer<lego_throw::throwingAction> server(node_handle, "throwing", boost::bind(&execute_throw, _1, &server), false);
     server.start();
 
-    ros::Subscriber box_position_subscriber = node_handle.subscribe("box_position", 1, goal_position_callback);
+    ros::Subscriber gripper_state_subscriber = node_handle.subscribe("gripper_state", 10, gripper_state_callback);
+
     spinner.start();
 
     configure_serial_port();

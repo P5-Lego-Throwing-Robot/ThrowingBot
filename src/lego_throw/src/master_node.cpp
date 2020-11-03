@@ -4,26 +4,47 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <fstream>
-#include <lego_throw/pick_option.h>
 #include <lego_throw/pick_optionAction.h>
+#include <lego_throw/throwingAction.h>
 #include <actionlib/client/simple_action_client.h>
+#include <lego_throw/camera.h>
+
+struct box_id {
+    std::string box_id;
+    float x;
+    float y;
+    float z;
+};
 
 // Global variables: 
 nlohmann::json order;
-std::vector<std::string> box_id_queue; 
+std::vector<box_id> box_id_queue; 
+
 
 // Callback function:
-void box_id_callback(const std_msgs::String::ConstPtr& msg){
+bool box_id_callback(lego_throw::camera::Request  &req,
+                     lego_throw::camera::Response &res){
         
-        std::string ID = msg->data;
+        box_id temp_box;
 
-        if(order.contains(ID)){
-            std::cout << ID << " was added to the processing queue." << "\n";
-            box_id_queue.push_back(ID);
+        temp_box.box_id = req.data;
+        temp_box.x = req.x;
+        temp_box.y = req.y;
+        temp_box.z = req.z;
+
+        if(order.contains(temp_box.box_id))
+        {
+            std::cout << temp_box.box_id << " was added to the processing queue." << "\n";
+            box_id_queue.push_back(temp_box);
         }
-        else {
-            std::cout << ID <<" was not found in the database." << "\n";
+        
+        else 
+        {
+            std::cout << temp_box.box_id <<" was not found in the database." << "\n";
         }
+
+        res.status = 0;
+        return true;
 }
 
 
@@ -51,23 +72,26 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "master_node");
     ros::NodeHandle node_handle;
 
-    // Picking action client:
-    actionlib::SimpleActionClient<lego_throw::pick_optionAction> picking_client("pick_option", true);
-    picking_client.waitForServer();
+    // Service server:
+    ros::ServiceServer service = node_handle.advertiseService("camera", box_id_callback);
 
-    // Subscriber:
-    ros::Subscriber box_info = node_handle.subscribe("box_info", 1, box_id_callback);
+    // Action clients:
+    actionlib::SimpleActionClient<lego_throw::pick_optionAction> picking_client("pick_option", true);
+    actionlib::SimpleActionClient<lego_throw::throwingAction> throwing_client("throwing", true);
+
+    // Waiting for action servers:
+    picking_client.waitForServer();
+    throwing_client.waitForServer();
     
     // Loading orders from file:
     load_json(ros::package::getPath("lego_throw") + ("/orders/orders.json"), order);
 
-    // Variables for controlling the flow of the code:
-    bool processing = false;
-    bool picking_goal_sent = false;
-    bool throwing_goal_sent = false;
-    bool picking_done = false;
-    bool throwing_done = false;
+    // State varaible:
+    int state = 0;
+
+    // Action goals:
     lego_throw::pick_optionGoal pick_option_goal;
+    lego_throw::throwingGoal throwing_goal;
 
     while(ros::ok()) 
     {
@@ -75,66 +99,71 @@ int main(int argc, char **argv)
         {
 
             // Setting new goals:
-            if (processing == false) 
+            if (state == 0) 
             {
-                processing = true;
+                std::cout << "---------------------\nSTARTING TO PROCESS -> " << box_id_queue[0].box_id << std::endl;
 
-                pick_option_goal.option = order[box_id_queue[0]][0];
+                pick_option_goal.option = order[box_id_queue[0].box_id][0];
+                throwing_goal.x = box_id_queue[0].x;
+                throwing_goal.y = box_id_queue[0].y;
+                throwing_goal.z = box_id_queue[0].z;
+
+                std::cout << "Order: " << pick_option_goal.option << ", X: " << throwing_goal.x << " , Y: " << throwing_goal.y << " , Z: " << throwing_goal.z << std::endl;
+
+                state = 1;
             }
             
             // Sending picking goal if one has not been set before:
-            if (picking_goal_sent == false) 
+            if (state == 1) 
             {
+                ROS_INFO("SENDING PICKING GOAL!");
                 picking_client.sendGoal(pick_option_goal);
-                picking_goal_sent = true;
+
+                state = 2;
             }
 
             // Checking to see if set picking goal is completed:
-            if (picking_goal_sent == true && picking_client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+            if (state == 2 && picking_client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
             {
-                picking_done = true;
-
-                // DELETE:
-                // Done processing:
-                std::cout << "Done processing " << box_id_queue[0] << std::endl;
-                box_id_queue.erase(box_id_queue.begin());
-                processing = false;
-                picking_goal_sent = false;
-                throwing_goal_sent = false;
-                picking_done = false;
-                throwing_done = false;
+                ROS_INFO("PICKING DONE!");
+                
+                state = 3;
             }
 
-            /*
             // If picking goal is complete a throwing goal is sent:
-            if (picking_done == true && throwing_goal_sent == false) 
+            if (state == 3) 
             {
-                throwing_goal_sent == true;
+                ROS_INFO("SENDING THROWING GOAL!");
+                throwing_client.sendGoal(throwing_goal);
+                
+                state = 4;
             }
 
-            
              // Checking to see if set picking goal is completed:
-            if (throwing_goal_sent == true && throwing_client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+            if (state == 4 && throwing_client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
             {
-                picking_done = true;
+                ROS_INFO("THROWING DONE!");
+                
+                state = 5;
             }
 
-            if (picking_done == true && throwing_done == true)
+            // If both picking and throwing is done, the order has been packed:
+            if (state == 5)
             {
+ 
                 // Done processing:
-                std::cout << "Done processing " << box_id_queue[0] << std::endl;
+                std::cout << "DONE PROCESSING -> " << box_id_queue[0].box_id << "\n---------------------" << std::endl;
+
+                // Erasing first element in box_id:
                 box_id_queue.erase(box_id_queue.begin());
-                processing = false;
-                picking_goal_sent = false;
-                throwing_goal_sent = false;
-                picking_done = false;
-                throwing_done = false;
+
+                // Resetting state:
+                state = 0;
             }
-            */
         }
    
-        ROS_INFO("TEST");
-        
+        //ROS_INFO("TEST");
+
         ros::spinOnce();
         ros::Rate(10).sleep();
     }

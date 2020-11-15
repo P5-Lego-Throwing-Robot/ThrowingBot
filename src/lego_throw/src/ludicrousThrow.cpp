@@ -33,8 +33,8 @@ std::vector<double> joint_position_start{0.0, -(M_PI*13)/16, -(M_PI*6)/16, -(M_P
 std::vector<double> joint_position_throw{0.0, -(M_PI*10)/16, -(M_PI*3)/16, (M_PI*1)/16, M_PI/2, 0.0};
 std::vector<double> joint_position_end{0.0, -(M_PI*10)/16, -(M_PI*3)/16, (M_PI*1)/16, M_PI/2, 0.0};
 
-//double offset = 0.109492; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
-double offset = 0.1053; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
+//double l2 = 0.109492; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
+double l2 = 0.1053; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
 double g = -9.816;
 std::vector<double> zero_velocity_vector{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 const std::string PLANNING_GROUP = "manipulator";
@@ -43,10 +43,10 @@ int serial_port = 0;
 
 // Finds the angle of joint one so that the goal position intersects with the throwing plane
 double get_joint_one_angle(double x, double y) {
-    double distToPoint = sqrt(pow(x, 2) + pow(y, 2));
-    double theta1 = asin(offset/distToPoint);
-    double theta2 = atan2(y, x);
-    return theta2 - theta1;
+    double l1 = sqrt(pow(x, 2) + pow(y, 2));
+    double phi1 = asin(l2/l1);
+    double phi2 = atan2(y, x);
+    return phi2 - phi1;
 }
 
 
@@ -92,7 +92,7 @@ std::vector<double> get_joint_velocities(std::vector<double> end_effector_veloci
     inverse_jacobian = jacobian.inverse();
     Eigen::MatrixXd end_effector_velocities_matrix(6, 1);
     end_effector_velocities_matrix << end_effector_velocities[0], end_effector_velocities[1], end_effector_velocities[2], end_effector_velocities[3], end_effector_velocities[4], end_effector_velocities[5];
-    Eigen::MatrixXd joint_velocities_matrix = inverse_jacobian*end_effector_velocities_matrix;
+    Eigen::MatrixXd joint_velocities_matrix = inverse_jacobian * end_effector_velocities_matrix;
     std::vector<double> joint_velocities;
     joint_velocities.push_back(joint_velocities_matrix(0, 0));
     joint_velocities.push_back(joint_velocities_matrix(1, 0));
@@ -199,7 +199,6 @@ moveit_msgs::RobotTrajectory scale_trajectory(moveit_msgs::RobotTrajectory traje
         trajectory.joint_trajectory.points[i].time_from_start = seconds;
         trajectory.joint_trajectory.points[i].positions[0] = degrees;
     }
-
     return trajectory;
 }
 
@@ -218,10 +217,8 @@ void go_to_joint_position(std::vector<double> joint_goal) {
 
 
 void configure_serial_port() {
-    // Open the serial port. Change device path as needed (currently set to an standard FTDI USB-UART cable type device)
     serial_port = open("/dev/ttyACM0", O_RDWR);
 
-    // Create new termios struc, we call it 'tty' for convention
     struct termios tty;
 
     // Read in existing settings, and handle any error
@@ -286,9 +283,10 @@ void throw_to(double position[3]) {
     turned_joint_position_throw[0] = joint_one_angle;
     Eigen::Isometry3d cartesian_throw_pose = forward_kinematics(turned_joint_position_throw); // Finding the cartesian position of the throwing position
 
-    double height = goal_position[2] - cartesian_throw_pose.translation().z(); // Calculate the change in height from throwing position to goal position
-    double length = sqrt(pow((goal_position[0]-cartesian_throw_pose.translation().x()), 2) + pow((goal_position[1]-cartesian_throw_pose.translation().y()), 2)); // Calculate the euclidean distance from the throwing position to goal position in the x, y-plane
-    double velocity = get_throwing_velocity(height, length, throwing_angle); // Calculate the initial throwing velocity
+    double delta_y = goal_position[2] - cartesian_throw_pose.translation().z(); // Calculate the change in height from throwing position to goal position
+    double delta_x = sqrt(pow((goal_position[0]-cartesian_throw_pose.translation().x()), 2) + pow((goal_position[1]-cartesian_throw_pose.translation().y()), 2)); // Calculate the euclidean distance from the throwing position to goal position in the x, y-plane
+
+    double velocity = get_throwing_velocity(delta_y, delta_x, throwing_angle); // Calculate the initial throwing velocity
 
     if (velocity > 4.9) {
         throw "too fast";
@@ -324,8 +322,6 @@ void throw_to(double position[3]) {
     ROS_INFO("time: %f", (acceleration_time / velocity));
     ROS_INFO("velocity: %f", velocity);
 
-    std::vector<double> joint_values = move_group.getCurrentJointValues();
-
     ros::spinOnce();
 }
 
@@ -339,10 +335,6 @@ void gripper_state_callback(const std_msgs::UInt16::ConstPtr& msg) {
 
 
 void execute_throw(const lego_throw::throwingGoalConstPtr& goal, actionlib::SimpleActionServer<lego_throw::throwingAction>* action_server) {
-    // Do lots of awesome groundbreaking robot stuff here
-
-    ROS_INFO("something happend. SUCCESS!!!!!");
-
     goal_position[0] = goal->x;
     goal_position[1] = goal->y;
     goal_position[2] = goal->z;
@@ -366,7 +358,7 @@ void execute_throw(const lego_throw::throwingGoalConstPtr& goal, actionlib::Simp
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "ludicrous_throw");
-    ros::AsyncSpinner spinner(4);
+    ros::AsyncSpinner spinner(4); // We use 4 threads for callbacks
 
     ros::NodeHandle node_handle;
 
@@ -378,18 +370,6 @@ int main(int argc, char** argv) {
     spinner.start();
 
     configure_serial_port();
-
-/*
-    try {
-        throw_to(goal_position);
-        
-        ros::Duration(3.0).sleep();
-        
-        set_gripper_state(false);
-    } catch(std::string error) {
-        ROS_ERROR("error: %s", error.c_str());
-    }
-    */
 
     ros::waitForShutdown();
 

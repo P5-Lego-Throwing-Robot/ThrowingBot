@@ -179,7 +179,7 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
 
             // Check if the packaging QR code already exists
             for (int j = 0; j < qrCustomNamesDetected.size(); j++) {
-                if (objects[i].data == qrCustomNamesDetected[j].data)   // It exists, then return to main loop, else continue
+                if (objects[i].data == qrCustomNamesDetected[j].data)   // It exists, then return to main loop, else continue with the new QR code
                     return;
             }
             customQRDetected.push_back(objects[i]);                     // Save new QR code so we dont repack same lego box
@@ -229,14 +229,11 @@ int main(int argc, char *argv[]) {
     printf("Start filming the scene\n");
     while (ros::ok()) {
 
-
         retrieveFrame(pipe, &frame);                                    // Get a set of frames from realsense Camera
-        // Find the QR codes
         decode(frame.matImage, decodedObjects);                         // Scan image for QR codes
 
-        // If we have 4 or more QR codes
-        if (decodedObjects.size() > 3)
-            doHomography(decodedObjects, frame.matImage);               // Calculate homography from QR codes
+        if (decodedObjects.size() > 3)                                  // If we have 4 or more QR codes then -
+            doHomography(decodedObjects, frame.matImage);               // -Calculate homography from QR codes
 
         cvtColor(frame.matImage, frame.matImage, cv::COLOR_BGR2RGB);    // Convert to RGB to display correct colors
         cv::imshow("Image", frame.matImage);                            // Display image for user feedback

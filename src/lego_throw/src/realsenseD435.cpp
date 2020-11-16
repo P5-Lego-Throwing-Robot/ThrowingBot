@@ -228,8 +228,7 @@ int main(int argc, char *argv[]) {
 
     printf("Start filming the scene\n");
     while (ros::ok()) {
-        decodedObjects.clear();                                         // Reset vector of scanned QR codes
-        //memset(&frame, 0x00, sizeof(memset));                         // Reset frames object --> Not necessary but nice to do
+
 
         retrieveFrame(pipe, &frame);                                    // Get a set of frames from realsense Camera
         // Find the QR codes
@@ -242,7 +241,10 @@ int main(int argc, char *argv[]) {
         cvtColor(frame.matImage, frame.matImage, cv::COLOR_BGR2RGB);    // Convert to RGB to display correct colors
         cv::imshow("Image", frame.matImage);                            // Display image for user feedback
 
-        if (cv::waitKey(25) == 27) break;
+        if (cv::waitKey(25) == 27) break;                               // If ESC is pushed then break loop
+
+        decodedObjects.clear();                                         // Reset vector of scanned QR codes
+        //memset(&frame, 0x00, sizeof(memset));                         // Reset frames object --> Not necessary but nice to do
 
     }
     return 0;

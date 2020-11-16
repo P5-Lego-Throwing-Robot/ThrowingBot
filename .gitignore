@@ -1,4 +1,6 @@
 build/
 devel/
 src/testing.cpp
-.vscode/
+.vscode/git
+src/cmake-build-debug
+.idea

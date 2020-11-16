@@ -12,13 +12,14 @@
 #include <typeinfo>
 #include <iostream>
 
-
+// Struct to store the scanned QR codes
 struct Object : public cv::_InputArray {
     std::string data;
     std::vector <cv::Point> location;
     cv::Point center;
 };
 
+// Struct to store a set of frames from realsense
 struct Frame {
     rs2::frameset frameset;
     rs2::frame colorFrame;
@@ -37,23 +38,22 @@ struct Frame {
         "ID_4",
         "ID_5"
 };
-
-std::vector <Object> customQRDetected; 
-
-
-// service client 
+// Global variable to keep track of lego boxes that has been scanned
+std::vector <Object> qrCustomNamesDetected;
+// ROS service client
 ros::ServiceClient client;
 
 
-// Get a frame from realsense
+// Get a frame from realsense. Purpose of this function is to group the image collecting here.
 void retrieveFrame(const rs2::pipeline &pipe, Frame *frame) {
-    frame->frameset = pipe.wait_for_frames();
+    frame->frameset = pipe.wait_for_frames();                               // Get a frameset from realsense pipeline object. This object holds all data from the realsense camera
     frame->colorFrame = frame->frameset.get_color_frame();
-    //frame->depthFrame = frame->frameset.get_depth_frame(); // We do not need depth frame for anything.. yet
-    frame->width = frame->colorFrame.as<rs2::video_frame>().get_width();
-    frame->height = frame->colorFrame.as<rs2::video_frame>().get_height();
+    //frame->depthFrame = frame->frameset.get_depth_frame();                // We do not need depth frame for anything.. yet
+    frame->width = frame->colorFrame.as<rs2::video_frame>().get_width();    // Width for OpenCV Mat object
+    frame->height = frame->colorFrame.as<rs2::video_frame>().get_height();  // Height for OpenCV Mat object
     frame->matImage = cv::Mat(cv::Size(frame->width, frame->height), CV_8UC3, (void *) frame->colorFrame.get_data(),
-                              cv::Mat::AUTO_STEP);
+                              cv::Mat::AUTO_STEP);                          // Construct openCV mat object used in zBar and homogryaphy
+
 
     // Increment frame number
     frame->count++;
@@ -104,39 +104,35 @@ void decode(cv::Mat &im, std::vector <Object> &decodedObjects) {
 
 
 void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
+    // Find homography matrix needs 8 points.
+    std::vector <cv::Point2f> surfaceQR(4);     // Four corners of the real world plane
+    std::vector <cv::Point2f> cameraQR(4);      // Four corners of the image plane
 
-    // Four corners of the plane in of the real world is added to each QR code
-    std::vector <cv::Point2f> cornersForPlane(4);
-    // Put QR positions into a new vector of cv::Point2f, this new type is needed for findHomography(...);
-    // Corner QR codes should be filtered from custom qr codes which is why we loop through them.
-    std::vector <cv::Point2f> QrCamCoordinates(4);
+
+    // The QR codes that is scanned from zBar does not come ordered.
+    // Thus we want to sort the corresponding points in SurfaceQR and cameraQR such that corresponding points is at the same index.
     int amountQRCornersFound = 0;
-
-    
-
-
-
 
     //ROBOT TABLE POINTS
     for (int i = 0; i < objects.size(); ++i) {
         if (objects[i].data == "00") {
-            cornersForPlane[amountQRCornersFound] = cv::Point2f(0, 0);
-            QrCamCoordinates[amountQRCornersFound] = objects[i].center;
+            surfaceQR[amountQRCornersFound] = cv::Point2f(0, 0);
+            cameraQR[amountQRCornersFound] = objects[i].center;
             amountQRCornersFound++;
         }
         if (objects[i].data == "01") {
-            cornersForPlane[amountQRCornersFound] = cv::Point2f(71, 0);
-            QrCamCoordinates[amountQRCornersFound] = objects[i].center;
+            surfaceQR[amountQRCornersFound] = cv::Point2f(71, 0);
+            cameraQR[amountQRCornersFound] = objects[i].center;
             amountQRCornersFound++;
         }
         if (objects[i].data == "02") {
-            cornersForPlane[amountQRCornersFound] = cv::Point2f(0, 74);
-            QrCamCoordinates[amountQRCornersFound] = objects[i].center;
+            surfaceQR[amountQRCornersFound] = cv::Point2f(0, 74);
+            cameraQR[amountQRCornersFound] = objects[i].center;
             amountQRCornersFound++;
         }
         if (objects[i].data == "03") {
-            cornersForPlane[amountQRCornersFound] = cv::Point2f(74, 71);
-            QrCamCoordinates[amountQRCornersFound] = objects[i].center;
+            surfaceQR[amountQRCornersFound] = cv::Point2f(74, 71);
+            cameraQR[amountQRCornersFound] = objects[i].center;
             amountQRCornersFound++;
         }
     }
@@ -166,21 +162,15 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
         }
     }
     */
-    // If we didn't find 4 QR corners then stop executing and return to main loop
-    if (amountQRCornersFound != 4)
+    // If we didn't find 4 QR corners OR We didn't find any lego boxes
+    // then stop executing and return to main loop
+    if (amountQRCornersFound != 4 || objects.size() < 5)
         return;
 
-    //calculate Homography matrix from 4 corners position with offsets
-    cv::Mat hMatrix = findHomography(QrCamCoordinates, cornersForPlane);
+    //calculate Homography matrix from 4 sets of corresponding points
+    cv::Mat hMatrix = findHomography(cameraQR, surfaceQR);
 
-    // Output image
-    cv::Mat hImage;
-    //Warp source image to destination based on homography
-    warpPerspective(colorImage, hImage, hMatrix, cv::Size(500, 500));
-    cv::namedWindow("homography", cv::WINDOW_FULLSCREEN);
-    cv::imshow("homography", hImage);
-
-    // Check if packaging QR codes have been found
+    // Check for the lego boxes QR codes.
     for (int i = 0; i < objects.size(); i++) {
          std::vector<std::string>::const_iterator it;
         it = std::find(std::begin(qrCustomNames), std::end(qrCustomNames), objects[i].data);
@@ -188,28 +178,20 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
         if (it != std::end(qrCustomNames)) {
 
             // Check if the packaging QR code already exists
-            for (int j = 0; j < customQRDetected.size(); j++) {
-                if (objects[i].data == customQRDetected[j].data) // It exists
+            for (int j = 0; j < qrCustomNamesDetected.size(); j++) {
+                if (objects[i].data == qrCustomNamesDetected[j].data)   // It exists, then return to main loop, else continue
                     return;
             }
-            // If we reach this far we have a new object
+            customQRDetected.push_back(objects[i]);                     // Save new QR code so we dont repack same lego box
 
-            // Alert main node we have a new object
-            customQRDetected.push_back(objects[i]);
-            // Publish etc...
+            std::vector <cv::Point2f> legoBox = {objects[i].center};    // Load point in as a cv::Point2f because that's perspectiveTransform's input.
+            perspectiveTransform(yeetPoints, yeetPoints, hMatrix);      // Multiply point with homography matrix
 
-            std::vector <cv::Point2f> yeetPoints(1);
-            yeetPoints[0] = objects[i].center;
+            float xRobotOffset = -28;   // robot offset form real world surface plane in cm
+            float yRobotOffset = 73;    // robot offset form real world surface plane in cm
 
-            // Multiply point with homography matrix
-            perspectiveTransform(yeetPoints, yeetPoints, hMatrix);
-            printf("%s coordinates: %f, %f\n", objects[i].data.c_str(), yeetPoints[0].x, yeetPoints[0].y);
-
-            float xRobotOffset = -28; //cm
-            float yRobotOffset = 73; // cm
-
-            float xWithOffsetInMeters = ((yeetPoints[0].x + (xRobotOffset))) / 100.0f;
-            float yWithOffsetInMeters = ((yeetPoints[0].y + yRobotOffset)) / 100.0f;
+            float xWithOffsetInMeters = ((legoBox[0].x + (xRobotOffset))) / 100.0f;  // Apply offset
+            float yWithOffsetInMeters = ((legoBox[0].y + yRobotOffset)) / 100.0f;    // Apply offset
 
             
             lego_throw::camera camSrv;
@@ -218,8 +200,7 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
             camSrv.request.y = yWithOffsetInMeters;
             camSrv.request.z = 0.045;
             camSrv.request.data = *it;
-            
-            printf("working1\n");
+
             if (client.call(camSrv)) printf("Response status: %i\n", camSrv.response.status);
         }
     }

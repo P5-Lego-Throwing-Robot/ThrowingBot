@@ -211,36 +211,36 @@ int main(int argc, char *argv[]) {
     // -- REALSENSE SETUP --
     // Declare RealSense pipeline, encapsulating the actual device and sensors
     rs2::pipeline pipe;
-    // Start streaming with default recommended configuration
+    // Start streaming from camera with default recommended configuration
     pipe.start();
-    // define frame handle
-    Frame frame;
-    // QR contents
 
-    // --- ROS STUFF
+    // --- ROS STUFF ---
     ros::init(argc, argv, "realsenseVision");
     ros::NodeHandle node_handle;
-   // yeetLocationPublisher = node_handle.advertise<geometry_msgs::Vector3>("box_position", 1000);
 
-    //Creating the client
+    // Creating the client
     client = node_handle.serviceClient<lego_throw::camera>("camera");
     client.waitForExistence();
-  
-    // QR CODES STUFF
+
+    // --- GROUP 563 ---
+    Frame frame;                               // Place to store realsense frames
+    std::vector <Object> decodedObjects;       // A vector to store scanned QR codes in
+
     printf("Start filming the scene\n");
     while (ros::ok()) {
-        std::vector <Object> decodedObjects;
+        decodedObjects.clear();                                         // Reset vector of scanned QR codes
+        //memset(&frame, 0x00, sizeof(memset));                         // Reset frames object --> Not necessary but nice to do
 
-        retrieveFrame(pipe, &frame);
+        retrieveFrame(pipe, &frame);                                    // Get a set of frames from realsense Camera
         // Find the QR codes
-        decode(frame.matImage, decodedObjects);
+        decode(frame.matImage, decodedObjects);                         // Scan image for QR codes
 
-        cvtColor(frame.matImage, frame.matImage, cv::COLOR_BGR2RGB);
-        cv::imshow("Image", frame.matImage);
-
-        // Dont bother checking for corners unless we have 4 or more corners
+        // If we have 4 or more QR codes
         if (decodedObjects.size() > 3)
-            doHomography(decodedObjects, frame.matImage);
+            doHomography(decodedObjects, frame.matImage);               // Calculate homography from QR codes
+
+        cvtColor(frame.matImage, frame.matImage, cv::COLOR_BGR2RGB);    // Convert to RGB to display correct colors
+        cv::imshow("Image", frame.matImage);                            // Display image for user feedback
 
         if (cv::waitKey(25) == 27) break;
 

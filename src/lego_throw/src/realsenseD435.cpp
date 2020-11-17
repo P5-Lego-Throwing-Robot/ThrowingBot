@@ -131,7 +131,7 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
             amountQRCornersFound++;
         }
         if (objects[i].data == "03") {
-            surfaceQR[amountQRCornersFound] = cv::Point2f(74, 71);
+            surfaceQR[amountQRCornersFound] = cv::Point2f(71, 74);
             cameraQR[amountQRCornersFound] = objects[i].center;
             amountQRCornersFound++;
         }
@@ -174,7 +174,6 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
     for (int i = 0; i < objects.size(); i++) {
          std::vector<std::string>::const_iterator it;
         it = std::find(std::begin(qrCustomNames), std::end(qrCustomNames), objects[i].data);
-        
         if (it != std::end(qrCustomNames)) {
 
             // Check if the packaging QR code already exists
@@ -224,24 +223,24 @@ int main(int argc, char *argv[]) {
 
     // --- GROUP 563 ---
     Frame frame;                               // Place to store realsense frames
-    std::vector <Object> decodedObjects;       // A vector to store scanned QR codes in
+    std::vector<Object> decodedObjects;       // A vector to store scanned QR codes in
 
     printf("Start filming the scene\n");
     while (ros::ok()) {
 
-        retrieveFrame(pipe, &frame);                                    // Get a set of frames from realsense Camera
-        decode(frame.matImage, decodedObjects);                         // Scan image for QR codes
+        retrieveFrame(pipe, &frame);                                            // Get a set of frames from realsense Camera
+        decode(frame.matImage, decodedObjects);                           // Scan image for QR codes
 
-        if (decodedObjects.size() > 3)                                  // If we have 4 or more QR codes then -
-            doHomography(decodedObjects, frame.matImage);               // -Calculate homography from QR codes
+        if (decodedObjects.size() > 3)                                          // If we have 4 or more QR codes then -
+            doHomography(decodedObjects, frame.matImage);                       // -Calculate homography from QR codes
 
-        cvtColor(frame.matImage, frame.matImage, cv::COLOR_BGR2RGB);    // Convert to RGB to display correct colors
-        cv::imshow("Image", frame.matImage);                            // Display image for user feedback
+        cvtColor(frame.matImage, frame.matImage, cv::COLOR_BGR2RGB);      // Convert to RGB to display correct colors
+        cv::imshow("Image", frame.matImage);                           // Display image for user feedback
 
-        if (cv::waitKey(25) == 27) break;                               // If ESC is pushed then break loop
+        if (cv::waitKey(25) == 27) break;                                // If ESC is pushed then break loop
 
-        decodedObjects.clear();                                         // Reset vector of scanned QR codes
-        //memset(&frame, 0x00, sizeof(frame));                         // Reset frames object --> Not necessary but nice to do
+        decodedObjects.clear();                                                // Reset vector of scanned QR codes
+        //memset(&frame, 0x00, sizeof(frame));                                 // Reset frames object --> Not necessary but nice to do
 
     }
     return 0;

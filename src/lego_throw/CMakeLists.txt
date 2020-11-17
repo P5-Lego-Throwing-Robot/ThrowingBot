@@ -234,5 +234,5 @@ add_executable(picking_node src/picking_node.cpp)
 add_dependencies(picking_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
 target_link_libraries(picking_node ${catkin_LIBRARIES})
 
-# add_executable(realsenseD435 src/realsenseD435.cpp)
-# target_link_libraries(realsenseD435 ${catkin_LIBRARIES} realsense2 -lzbar)
+add_executable(realsenseD435 src/realsenseD435.cpp)
+target_link_libraries(realsenseD435 ${catkin_LIBRARIES} realsense2 -lzbar)

@@ -241,7 +241,7 @@ int main(int argc, char *argv[]) {
         if (cv::waitKey(25) == 27) break;                               // If ESC is pushed then break loop
 
         decodedObjects.clear();                                         // Reset vector of scanned QR codes
-        //memset(&frame, 0x00, sizeof(memset));                         // Reset frames object --> Not necessary but nice to do
+        //memset(&frame, 0x00, sizeof(frame));                         // Reset frames object --> Not necessary but nice to do
 
     }
     return 0;

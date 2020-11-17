@@ -182,10 +182,10 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
                 if (objects[i].data == qrCustomNamesDetected[j].data)   // It exists, then return to main loop, else continue with the new QR code
                     return;
             }
-            customQRDetected.push_back(objects[i]);                     // Save new QR code so we dont repack same lego box
+            qrCustomNamesDetected.push_back(objects[i]);                     // Save new QR code so we dont repack same lego box
 
             std::vector <cv::Point2f> legoBox = {objects[i].center};    // Load point in as a cv::Point2f because that's perspectiveTransform's input.
-            perspectiveTransform(yeetPoints, yeetPoints, hMatrix);      // Multiply point with homography matrix
+            perspectiveTransform(legoBox, legoBox, hMatrix);      // Multiply point with homography matrix
 
             float xRobotOffset = -28;   // robot offset form real world surface plane in cm
             float yRobotOffset = 73;    // robot offset form real world surface plane in cm

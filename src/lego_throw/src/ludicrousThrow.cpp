@@ -19,6 +19,8 @@
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h> // write(), read(), close()
 
+moveit::planning_interface::MoveGroupInterface *move_group;
+
 double goal_position[3] = {0.1, 1.3, 0.05}; // goal position in meters from base frame
 double throwing_angle = (M_PI*3.0)/16; // The angle to throw in radians
 double rotation_velocity = 2.0; // radians/sec rotation of object when throwing velocity is 1.0
@@ -26,7 +28,7 @@ double acceleration_time = 1.5; // Time it takes to accelerate from joint_positi
 double deceleration_time = 4.0; // Time it takes to decelerate from joint_position_throw to joint_position_end when throwing velocity = 1.0
 int acceleration_waypoints = 100; // Number of waypoints in the acceleration phase
 int deceleration_waypoints = 100; // Number of waypoints in the deceleration phase
-double return_to_start_acceleration_scale = 0.1;
+double return_to_start_acceleration_scale = 0.7;
 
 // Start, throw and end positions in joint space. radians
 std::vector<double> joint_position_start{0.0, -(M_PI*13)/16, -(M_PI*6)/16, -(M_PI*2)/16, M_PI/2, 0.0};
@@ -106,9 +108,9 @@ std::vector<double> get_joint_velocities(std::vector<double> end_effector_veloci
 
 // Adds to a trajectory object using third degree polynomials
 moveit_msgs::RobotTrajectory add_to_a_trajectory(moveit_msgs::RobotTrajectory trajectory, std::vector<double> theta_start, std::vector<double> theta_end, std::vector<double> theta_dot_start, std::vector<double> theta_dot_end, double travel_time, int steps, bool is_first_step, double start_time) {
-    moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
+    //moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
     //move_group.setEndEffectorLink("tcp");
-    std::vector<std::string> jointNames = move_group.getJointNames();
+    std::vector<std::string> jointNames = move_group->getJointNames();
 
     trajectory.joint_trajectory.joint_names = jointNames;
 
@@ -205,14 +207,14 @@ moveit_msgs::RobotTrajectory scale_trajectory(moveit_msgs::RobotTrajectory traje
 
 // Go to some joint position
 void go_to_joint_position(std::vector<double> joint_goal) {
-    moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
+    //moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
     //move_group.setEndEffectorLink("tcp");
     moveit::planning_interface::MoveGroupInterface::Plan plan;
-    move_group.setMaxAccelerationScalingFactor(return_to_start_acceleration_scale);
-    move_group.setJointValueTarget(joint_goal);
-    move_group.setNumPlanningAttempts(10);
-    move_group.plan(plan);
-    move_group.execute(plan);
+    move_group->setMaxAccelerationScalingFactor(return_to_start_acceleration_scale);
+    move_group->setJointValueTarget(joint_goal);
+    move_group->setNumPlanningAttempts(10);
+    move_group->plan(plan);
+    move_group->execute(plan);
 }
 
 
@@ -274,7 +276,7 @@ void set_gripper_state(bool open) {
 
 // Takes a cartesian positian as input and tries to throw to that position.
 void throw_to(double position[3]) {
-    moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
+    //moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
     //move_group.setEndEffectorLink("tcp");
 
     double joint_one_angle = get_joint_one_angle(goal_position[0], goal_position[1]); // Calculating the angle of joint one in radians
@@ -312,7 +314,7 @@ void throw_to(double position[3]) {
     go_to_joint_position(turned_joint_position_start);
 
     // throw the object 
-    move_group.asyncExecute(trajectory);
+    move_group->asyncExecute(trajectory);
 
     //ros::Duration((acceleration_time / velocity) * 1.08).sleep();
     ros::Duration((acceleration_time / velocity) - 0.02).sleep();
@@ -361,6 +363,9 @@ int main(int argc, char** argv) {
     ros::AsyncSpinner spinner(4); // We use 4 threads for callbacks
 
     ros::NodeHandle node_handle;
+
+    moveit::planning_interface::MoveGroupInterface group(PLANNING_GROUP);
+    move_group = &group;
 
     actionlib::SimpleActionServer<lego_throw::throwingAction> server(node_handle, "throwing", boost::bind(&execute_throw, _1, &server), false);
     server.start();

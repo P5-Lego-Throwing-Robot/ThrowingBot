@@ -61,7 +61,7 @@ Eigen::Isometry3d forward_kinematics(std::vector<double> joint_values) {
     moveit::core::RobotStatePtr kinematic_state(new moveit::core::RobotState(kinematic_model));
     const moveit::core::JointModelGroup* joint_model_group = kinematic_model->getJointModelGroup(PLANNING_GROUP);
     kinematic_state->setJointGroupPositions(joint_model_group, joint_values);
-    const Eigen::Isometry3d& end_effector_state = kinematic_state->getGlobalLinkTransform("tcp");
+    const Eigen::Isometry3d& end_effector_state = kinematic_state->getGlobalLinkTransform("ee_link");
     return end_effector_state;
 }
 
@@ -328,7 +328,7 @@ void throw_to(double position[3]) {
     ROS_INFO("time: %f", (acceleration_time / velocity));
     ROS_INFO("velocity: %f", velocity);
 
-    ros::spinOnce();
+    ros::Duration(deceleration_time / velocity).sleep();
 }
 
 void gripper_state_callback(const std_msgs::UInt16::ConstPtr& msg) {
@@ -352,9 +352,6 @@ void execute_throw(const lego_throw::throwingGoalConstPtr& goal, actionlib::Simp
     try {
         throw_to(goal_position);
         
-        ros::Duration(3.0).sleep();
-        
-        set_gripper_state(false);
     } catch(std::string error) {
         ROS_ERROR("error: %s", error.c_str());
     }

@@ -9,13 +9,17 @@
 #include <ros/ros.h>
 #include "lego_throw/camera.h"
 
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+
 #include <typeinfo>
 #include <iostream>
 
 // Struct to store the scanned QR codes
 struct Object : public cv::_InputArray {
     std::string data;
-    std::vector <cv::Point> location;
+    std::vector<cv::Point> location;
     cv::Point center;
 };
 
@@ -31,7 +35,7 @@ struct Frame {
 };
 
 // Add names for QR codes here if you add more QR codes to scene
- const std::vector <std::string> qrCustomNames = {
+const std::vector<std::string> qrCustomNames = {
         "ID_1",
         "ID_2",
         "ID_3",
@@ -39,7 +43,7 @@ struct Frame {
         "ID_5"
 };
 // Global variable to keep track of lego boxes that has been scanned
-std::vector <Object> qrCustomNamesDetected;
+std::vector<Object> qrCustomNamesDetected;
 // ROS service client
 ros::ServiceClient client;
 
@@ -60,7 +64,7 @@ void retrieveFrame(const rs2::pipeline &pipe, Frame *frame) {
 }
 
 // Find and decode barcodes and QR codes
-void decode(cv::Mat &im, std::vector <Object> &decodedObjects) {
+void decode(cv::Mat &im, std::vector<Object> &decodedObjects) {
 
     // Create zbar scanner
     zbar::ImageScanner scanner;
@@ -83,7 +87,7 @@ void decode(cv::Mat &im, std::vector <Object> &decodedObjects) {
     for (zbar::Image::SymbolIterator symbol = image.symbol_begin(); symbol != image.symbol_end(); ++symbol) {
         Object obj;
         obj.data = symbol->get_data();
-        
+
         // Obtain location
         for (int i = 0; i < symbol->get_location_size(); i++) {
             obj.location.emplace_back(symbol->get_location_x(i), symbol->get_location_y(i));
@@ -103,10 +107,10 @@ void decode(cv::Mat &im, std::vector <Object> &decodedObjects) {
 }
 
 
-void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
+void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
     // Find homography matrix needs 8 points.
-    std::vector <cv::Point2f> surfaceQR(4);     // Four corners of the real world plane
-    std::vector <cv::Point2f> cameraQR(4);      // Four corners of the image plane
+    std::vector<cv::Point2f> surfaceQR(4);     // Four corners of the real world plane
+    std::vector<cv::Point2f> cameraQR(4);      // Four corners of the image plane
 
 
     // The QR codes that is scanned from zBar does not come ordered.
@@ -172,18 +176,21 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
 
     // Check for the lego boxes QR codes.
     for (int i = 0; i < objects.size(); i++) {
-         std::vector<std::string>::const_iterator it;
+        std::vector<std::string>::const_iterator it;
         it = std::find(std::begin(qrCustomNames), std::end(qrCustomNames), objects[i].data);
         if (it != std::end(qrCustomNames)) {
 
             // Check if the packaging QR code already exists
             for (int j = 0; j < qrCustomNamesDetected.size(); j++) {
-                if (objects[i].data == qrCustomNamesDetected[j].data)   // It exists, then return to main loop, else continue with the new QR code
+                if (objects[i].data ==
+                    qrCustomNamesDetected[j].data)   // It exists, then return to main loop, else continue with the new QR code
                     return;
             }
-            qrCustomNamesDetected.push_back(objects[i]);                     // Save new QR code so we dont repack same lego box
+            qrCustomNamesDetected.push_back(
+                    objects[i]);                     // Save new QR code so we dont repack same lego box
 
-            std::vector <cv::Point2f> legoBox = {objects[i].center};    // Load point in as a cv::Point2f because that's perspectiveTransform's input.
+            std::vector<cv::Point2f> legoBox = {
+                    objects[i].center};    // Load point in as a cv::Point2f because that's perspectiveTransform's input.
             perspectiveTransform(legoBox, legoBox, hMatrix);      // Multiply point with homography matrix
 
             float xRobotOffset = -28;   // robot offset form real world surface plane in cm
@@ -192,7 +199,7 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
             float xWithOffsetInMeters = ((legoBox[0].x + (xRobotOffset))) / 100.0f;  // Apply offset
             float yWithOffsetInMeters = ((legoBox[0].y + yRobotOffset)) / 100.0f;    // Apply offset
 
-            
+
             lego_throw::camera camSrv;
 
             camSrv.request.x = xWithOffsetInMeters;
@@ -206,7 +213,44 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
 
 }
 
+
+void calculateTransformation() {
+
+    // Given we know:
+    // -- where the robot QR code is
+    // -- the orientation of the Robot QR code
+    boost::numeric::ublas::vector<double> aP(2);        // Location of LEGO box from table frame
+    aP[0] = 30;
+    aP[1] = 30;
+    boost::numeric::ublas::vector<double> aPBorg(2);    // Location of Robot Oregon
+    aPBorg[0] = -10;
+    aPBorg[1] = 60;
+    boost::numeric::ublas::vector<double> bP(2);        // Location of LEGO box from Robot frame
+
+    // Rotate (angle) around z-axis.
+    double angle = M_PI_2;
+
+    // Initiate 2x2 matrix
+    boost::numeric::ublas::matrix<double> mat(2, 2);
+    // populate rotation matrix
+    mat(0, 0) = cos(angle);
+    mat(0, 1) = -sin(angle);
+    mat(1, 0) = sin(angle);
+    mat(0, 1) = cos(angle);
+
+    // Transpose matrix because we need the inverse
+    mat = boost::numeric::ublas::trans(mat);
+    // Multiply using eq: 2.17 in robotics book isolated for bP.
+    bP = boost::numeric::ublas::prod(mat, aP) - boost::numeric::ublas::prod(mat, aPBorg);
+
+    std::cout << bP << std::endl;
+
+}
+
 int main(int argc, char *argv[]) {
+
+    calculateTransformation();
+
     // -- REALSENSE SETUP --
     // Declare RealSense pipeline, encapsulating the actual device and sensors
     rs2::pipeline pipe;
@@ -228,7 +272,8 @@ int main(int argc, char *argv[]) {
     printf("Start filming the scene\n");
     while (ros::ok()) {
 
-        retrieveFrame(pipe, &frame);                                            // Get a set of frames from realsense Camera
+        retrieveFrame(pipe,
+                      &frame);                                            // Get a set of frames from realsense Camera
         decode(frame.matImage, decodedObjects);                           // Scan image for QR codes
 
         if (decodedObjects.size() > 3)                                          // If we have 4 or more QR codes then -

@@ -5,8 +5,8 @@ project(lego_throw)
 # add_compile_options(-std=c++11)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
-#set("OpenCV_DIR" "/home/ubuntu18/libraries/opencv/build") 
-#set("realsense2_DIR" "/opt/ros/melodic/lib/cmake/realsense2")
+set("OpenCV_DIR" "/usr/share/OpenCV/")
+set("realsense2_DIR" "/opt/ros/melodic/lib/cmake/realsense2")
 
 
 add_subdirectory(include/json_develop)
@@ -22,8 +22,8 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   genmsg 
   actionlib_msgs
- # OpenCV
- # realsense2
+  OpenCV
+  realsense2
 )
 
 ## System dependencies are found with CMake's conventions
@@ -234,5 +234,5 @@ add_executable(picking_node src/picking_node.cpp)
 add_dependencies(picking_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
 target_link_libraries(picking_node ${catkin_LIBRARIES})
 
-add_executable(realsenseD435 src/realsenseD435.cpp)
-target_link_libraries(realsenseD435 ${catkin_LIBRARIES} realsense2 -lzbar)
+add_executable(camera_node src/realsenseD435.cpp)
+target_link_libraries(camera_node ${catkin_LIBRARIES} realsense2 -lzbar)

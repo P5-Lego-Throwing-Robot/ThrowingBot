@@ -21,14 +21,16 @@
 
 moveit::planning_interface::MoveGroupInterface *move_group;
 
+moveit_msgs::RobotTrajectory trajectory;
+
 double goal_position[3] = {0.1, 1.3, 0.05}; // goal position in meters from base frame
 double throwing_angle = (M_PI*3.0)/16; // The angle to throw in radians
-double rotation_velocity = 2.0; // radians/sec rotation of object when throwing velocity is 1.0
-double acceleration_time = 1.5; // Time it takes to accelerate from joint_position_start to joint_position_throw when throwing velocity = 1.0
+double rotation_velocity = 1.7; // radians/sec rotation of object when throwing velocity is 1.0
+double acceleration_time = 2.3; // Time it takes to accelerate from joint_position_start to joint_position_throw when throwing velocity = 1.0
 double deceleration_time = 4.0; // Time it takes to decelerate from joint_position_throw to joint_position_end when throwing velocity = 1.0
 int acceleration_waypoints = 100; // Number of waypoints in the acceleration phase
 int deceleration_waypoints = 100; // Number of waypoints in the deceleration phase
-double return_to_start_acceleration_scale = 0.7;
+double return_to_start_acceleration_scale = 1.0;
 
 // Start, throw and end positions in joint space. radians
 std::vector<double> joint_position_start{0.0, -(M_PI*13)/16, -(M_PI*6)/16, -(M_PI*2)/16, M_PI/2, 0.0};
@@ -290,10 +292,11 @@ void throw_to(double position[3]) {
 
     double velocity = get_throwing_velocity(delta_y, delta_x, throwing_angle); // Calculate the initial throwing velocity
 
-    if (velocity > 4.9) {
+    if (velocity > 5.0) {
         throw "too fast";
     }
 
+/*
     std::vector<double> throwing_velocity_vector = vectorize_throwing_velocity(1.0, throwing_angle); // Calculating a velocity vector with a speed of 1.0
     throwing_velocity_vector.push_back(0.0);
     throwing_velocity_vector.push_back(rotation_velocity);
@@ -305,8 +308,9 @@ void throw_to(double position[3]) {
     moveit_msgs::RobotTrajectory trajectory;
     trajectory = add_to_a_trajectory(trajectory, joint_position_start, joint_position_throw, zero_velocity_vector, joint_velocities_vector, acceleration_time, acceleration_waypoints, true, 0.0);
     trajectory = add_to_a_trajectory(trajectory, joint_position_throw, joint_position_end, joint_velocities_vector, zero_velocity_vector, deceleration_time, deceleration_waypoints, false, acceleration_time);
-
-    trajectory = scale_trajectory(trajectory, velocity, joint_one_angle); // Scale the trajectory to the right velocity
+*/
+    moveit_msgs::RobotTrajectory scaled_trajectory = trajectory;
+    scaled_trajectory = scale_trajectory(scaled_trajectory, velocity, joint_one_angle); // Scale the trajectory to the right velocity
 
     // Go to the start position
     std::vector<double> turned_joint_position_start = joint_position_start;
@@ -314,7 +318,7 @@ void throw_to(double position[3]) {
     go_to_joint_position(turned_joint_position_start);
 
     // throw the object 
-    move_group->asyncExecute(trajectory);
+    move_group->asyncExecute(scaled_trajectory);
 
     //ros::Duration((acceleration_time / velocity) * 1.08).sleep();
     ros::Duration((acceleration_time / velocity) - 0.02).sleep();
@@ -358,6 +362,20 @@ void execute_throw(const lego_throw::throwingGoalConstPtr& goal, actionlib::Simp
 }
 
 
+void generate_trajectory() {
+    std::vector<double> throwing_velocity_vector = vectorize_throwing_velocity(1.0, throwing_angle); // Calculating a velocity vector with a speed of 1.0
+    throwing_velocity_vector.push_back(0.0);
+    throwing_velocity_vector.push_back(rotation_velocity);
+    throwing_velocity_vector.push_back(0.0);
+
+    std::vector<double> joint_velocities_vector = get_joint_velocities(throwing_velocity_vector, joint_position_throw); // Calculating joint velocities
+
+    // Instantiating a trajectory and adding an acceleration and deceleration phase to it
+    trajectory = add_to_a_trajectory(trajectory, joint_position_start, joint_position_throw, zero_velocity_vector, joint_velocities_vector, acceleration_time, acceleration_waypoints, true, 0.0);
+    trajectory = add_to_a_trajectory(trajectory, joint_position_throw, joint_position_end, joint_velocities_vector, zero_velocity_vector, deceleration_time, deceleration_waypoints, false, acceleration_time);
+}
+
+
 int main(int argc, char** argv) {
     ros::init(argc, argv, "ludicrous_throw");
     ros::AsyncSpinner spinner(4); // We use 4 threads for callbacks
@@ -366,6 +384,8 @@ int main(int argc, char** argv) {
 
     moveit::planning_interface::MoveGroupInterface group(PLANNING_GROUP);
     move_group = &group;
+
+    generate_trajectory();
 
     actionlib::SimpleActionServer<lego_throw::throwingAction> server(node_handle, "throwing", boost::bind(&execute_throw, _1, &server), false);
     server.start();

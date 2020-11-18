@@ -14,6 +14,8 @@ struct box_id {
     float x;
     float y;
     float z;
+
+    std::string option;
 };
 
 // Global variables: 
@@ -24,13 +26,15 @@ std::vector<box_id> box_id_queue;
 // Callback function:
 bool box_id_callback(lego_throw::camera::Request  &req,
                      lego_throw::camera::Response &res){
-        
+        for (int i =0 ; i<4; i++){
         box_id temp_box;
 
         temp_box.box_id = req.data;
         temp_box.x = req.x;
         temp_box.y = req.y;
         temp_box.z = req.z;
+
+        temp_box.option = order[req.data][i];
 
         if(order.contains(temp_box.box_id))
         {
@@ -42,7 +46,7 @@ bool box_id_callback(lego_throw::camera::Request  &req,
         {
             std::cout << temp_box.box_id <<" was not found in the database." << "\n";
         }
-
+        }
         res.status = 0;
         return true;
 }
@@ -103,7 +107,7 @@ int main(int argc, char **argv)
             {
                 std::cout << "---------------------\nSTARTING TO PROCESS -> " << box_id_queue[0].box_id << std::endl;
 
-                pick_option_goal.option = order[box_id_queue[0].box_id][0];
+                pick_option_goal.option = box_id_queue[0].option;
                 throwing_goal.x = box_id_queue[0].x;
                 throwing_goal.y = box_id_queue[0].y;
                 throwing_goal.z = box_id_queue[0].z;

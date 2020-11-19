@@ -30,7 +30,7 @@ double acceleration_time = 2.3; // Time it takes to accelerate from joint_positi
 double deceleration_time = 4.0; // Time it takes to decelerate from joint_position_throw to joint_position_end when throwing velocity = 1.0
 int acceleration_waypoints = 100; // Number of waypoints in the acceleration phase
 int deceleration_waypoints = 100; // Number of waypoints in the deceleration phase
-double return_to_start_acceleration_scale = 1.0;
+double return_to_start_acceleration_scale = 0.7;
 
 // Start, throw and end positions in joint space. radians
 std::vector<double> joint_position_start{0.0, -(M_PI*13)/16, -(M_PI*6)/16, -(M_PI*2)/16, M_PI/2, 0.0};

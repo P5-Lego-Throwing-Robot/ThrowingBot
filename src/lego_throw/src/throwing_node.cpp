@@ -1,7 +1,5 @@
+// ROS headers
 #include <ros/ros.h>
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <math.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
 #include "std_msgs/String.h"
 #include "std_msgs/UInt16.h"
 #include "geometry_msgs/Vector3.h"
@@ -9,9 +7,14 @@
 #include <actionlib/server/simple_action_server.h>
 #include <lego_throw/throwingAction.h>
 
-// C library headers
+// Moveit headers
+#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
+
+// C++ headers
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 // Linux headers
 #include <fcntl.h> // Contains file controls like O_RDWR
@@ -19,30 +22,31 @@
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h> // write(), read(), close()
 
+
+// Global variables
 moveit::planning_interface::MoveGroupInterface *move_group;
-
 moveit_msgs::RobotTrajectory trajectory;
-
-double goal_position[3] = {0.1, 1.3, 0.05}; // goal position in meters from base frame
-double throwing_angle = (M_PI*3.0)/16; // The angle to throw in radians
-double rotation_velocity = 1.7; // radians/sec rotation of object when throwing velocity is 1.0
-double acceleration_time = 2.3; // Time it takes to accelerate from joint_position_start to joint_position_throw when throwing velocity = 1.0
-double deceleration_time = 4.0; // Time it takes to decelerate from joint_position_throw to joint_position_end when throwing velocity = 1.0
-int acceleration_waypoints = 100; // Number of waypoints in the acceleration phase
-int deceleration_waypoints = 100; // Number of waypoints in the deceleration phase
-double return_to_start_acceleration_scale = 0.7;
-
-// Start, throw and end positions in joint space. radians
-std::vector<double> joint_position_start{0.0, -(M_PI*13)/16, -(M_PI*6)/16, -(M_PI*2)/16, M_PI/2, 0.0};
-std::vector<double> joint_position_throw{0.0, -(M_PI*10)/16, -(M_PI*3)/16, (M_PI*1)/16, M_PI/2, 0.0};
-std::vector<double> joint_position_end{0.0, -(M_PI*10)/16, -(M_PI*3)/16, (M_PI*1)/16, M_PI/2, 0.0};
-
-//double l2 = 0.109492; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
-double l2 = 0.1053; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
-double g = -9.816;
-std::vector<double> zero_velocity_vector{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-const std::string PLANNING_GROUP = "manipulator";
 int serial_port = 0;
+
+// === parameters affecting the throwing trajectory ===
+// Start, throw and end positions in joint space. radians
+const std::vector<double> joint_position_start{0.0, -(M_PI*13)/16, -(M_PI*6)/16, -(M_PI*2)/16, M_PI/2, 0.0};
+const std::vector<double> joint_position_throw{0.0, -(M_PI*10)/16, -(M_PI*3)/16, (M_PI*1)/16, M_PI/2, 0.0};
+const std::vector<double> joint_position_end{0.0, -(M_PI*10)/16, -(M_PI*3)/16, (M_PI*1)/16, M_PI/2, 0.0};
+const double throwing_angle = (M_PI*3.0)/16; // The angle to throw in radians
+const double rotation_velocity = 1.7; // radians/sec rotation of object when throwing velocity is 1.0
+const double acceleration_time = 2.3; // Time it takes to accelerate from joint_position_start to joint_position_throw when throwing velocity = 1.0
+const double deceleration_time = 4.0; // Time it takes to decelerate from joint_position_throw to joint_position_end when throwing velocity = 1.0
+const int acceleration_waypoints = 100; // Number of waypoints in the acceleration phase
+const int deceleration_waypoints = 100; // Number of waypoints in the deceleration phase
+// === parameters affecting the throwing trajectory ===
+
+// Constants
+const double return_to_start_acceleration_scale = 0.7;
+const double l2 = 0.1053; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
+const double g = -9.816;
+const std::vector<double> zero_velocity_vector{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+const std::string PLANNING_GROUP = "manipulator";
 
 
 // Finds the angle of joint one so that the goal position intersects with the throwing plane
@@ -110,11 +114,9 @@ std::vector<double> get_joint_velocities(std::vector<double> end_effector_veloci
 
 // Adds to a trajectory object using third degree polynomials
 moveit_msgs::RobotTrajectory add_to_a_trajectory(moveit_msgs::RobotTrajectory trajectory, std::vector<double> theta_start, std::vector<double> theta_end, std::vector<double> theta_dot_start, std::vector<double> theta_dot_end, double travel_time, int steps, bool is_first_step, double start_time) {
-    //moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
-    //move_group.setEndEffectorLink("tcp");
-    std::vector<std::string> jointNames = move_group->getJointNames();
+    std::vector<std::string> joint_names = move_group->getJointNames();
 
-    trajectory.joint_trajectory.joint_names = jointNames;
+    trajectory.joint_trajectory.joint_names = joint_names;
 
     double a0j1 = theta_start[0];
     double a0j2 = theta_start[1];
@@ -209,8 +211,6 @@ moveit_msgs::RobotTrajectory scale_trajectory(moveit_msgs::RobotTrajectory traje
 
 // Go to some joint position
 void go_to_joint_position(std::vector<double> joint_goal) {
-    //moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
-    //move_group.setEndEffectorLink("tcp");
     moveit::planning_interface::MoveGroupInterface::Plan plan;
     move_group->setMaxAccelerationScalingFactor(return_to_start_acceleration_scale);
     move_group->setJointValueTarget(joint_goal);
@@ -270,25 +270,24 @@ void configure_serial_port() {
 void set_gripper_state(bool open) {
     if (open) {
         write(serial_port, "1", 2);
+        ROS_INFO("Gripper opened\n");
     } else {
         write(serial_port, "0", 2);
+        ROS_INFO("Gripper closed\n");
     }
 }
 
 
 // Takes a cartesian positian as input and tries to throw to that position.
 void throw_to(double position[3]) {
-    //moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
-    //move_group.setEndEffectorLink("tcp");
-
-    double joint_one_angle = get_joint_one_angle(goal_position[0], goal_position[1]); // Calculating the angle of joint one in radians
+    double joint_one_angle = get_joint_one_angle(position[0], position[1]); // Calculating the angle of joint one in radians
 
     std::vector<double> turned_joint_position_throw = joint_position_throw;
     turned_joint_position_throw[0] = joint_one_angle;
     Eigen::Isometry3d cartesian_throw_pose = forward_kinematics(turned_joint_position_throw); // Finding the cartesian position of the throwing position
 
-    double delta_y = goal_position[2] - cartesian_throw_pose.translation().z(); // Calculate the change in height from throwing position to goal position
-    double delta_x = sqrt(pow((goal_position[0]-cartesian_throw_pose.translation().x()), 2) + pow((goal_position[1]-cartesian_throw_pose.translation().y()), 2)); // Calculate the euclidean distance from the throwing position to goal position in the x, y-plane
+    double delta_y = position[2] - cartesian_throw_pose.translation().z(); // Calculate the change in height from throwing position to goal position
+    double delta_x = sqrt(pow((position[0]-cartesian_throw_pose.translation().x()), 2) + pow((position[1]-cartesian_throw_pose.translation().y()), 2)); // Calculate the euclidean distance from the throwing position to goal position in the x, y-plane
 
     double velocity = get_throwing_velocity(delta_y, delta_x, throwing_angle); // Calculate the initial throwing velocity
 
@@ -296,19 +295,6 @@ void throw_to(double position[3]) {
         throw "too fast";
     }
 
-/*
-    std::vector<double> throwing_velocity_vector = vectorize_throwing_velocity(1.0, throwing_angle); // Calculating a velocity vector with a speed of 1.0
-    throwing_velocity_vector.push_back(0.0);
-    throwing_velocity_vector.push_back(rotation_velocity);
-    throwing_velocity_vector.push_back(0.0);
-
-    std::vector<double> joint_velocities_vector = get_joint_velocities(throwing_velocity_vector, joint_position_throw); // Calculating joint velocities
-
-    // Instantiating a trajectory and adding an acceleration and deceleration phase to it
-    moveit_msgs::RobotTrajectory trajectory;
-    trajectory = add_to_a_trajectory(trajectory, joint_position_start, joint_position_throw, zero_velocity_vector, joint_velocities_vector, acceleration_time, acceleration_waypoints, true, 0.0);
-    trajectory = add_to_a_trajectory(trajectory, joint_position_throw, joint_position_end, joint_velocities_vector, zero_velocity_vector, deceleration_time, deceleration_waypoints, false, acceleration_time);
-*/
     moveit_msgs::RobotTrajectory scaled_trajectory = trajectory;
     scaled_trajectory = scale_trajectory(scaled_trajectory, velocity, joint_one_angle); // Scale the trajectory to the right velocity
 
@@ -319,14 +305,15 @@ void throw_to(double position[3]) {
 
     // throw the object 
     move_group->asyncExecute(scaled_trajectory);
+    //move_group->asyncExecute(trajectory2);
 
     //ros::Duration((acceleration_time / velocity) * 1.08).sleep();
     ros::Duration((acceleration_time / velocity) - 0.02).sleep();
 
     set_gripper_state(true);
 
-    ROS_INFO("time: %f", (acceleration_time / velocity));
-    ROS_INFO("velocity: %f", velocity);
+    ROS_INFO("Acceleration time: %f s", (acceleration_time / velocity));
+    ROS_INFO("Velocity: %f m/s\n", velocity);
 
     ros::Duration(deceleration_time / velocity).sleep();
 }
@@ -340,26 +327,25 @@ void gripper_state_callback(const std_msgs::UInt16::ConstPtr& msg) {
 }
 
 
-void execute_throw(const lego_throw::throwingGoalConstPtr& goal, actionlib::SimpleActionServer<lego_throw::throwingAction>* action_server) {
-    goal_position[0] = goal->x;
-    goal_position[1] = goal->y;
-    goal_position[2] = goal->z;
+void execute_throw_callback(const lego_throw::throwingGoalConstPtr& goal, actionlib::SimpleActionServer<lego_throw::throwingAction>* action_server) {
+    double goal_position[3] = {goal->x, goal->y, goal->z};
 
-    ROS_INFO("pos x: %f", goal_position[0]);
-    ROS_INFO("pos y: %f", goal_position[1]);
-    ROS_INFO("pos z: %f", goal_position[2]);
+    ROS_INFO("Throwing goal received");
+    ROS_INFO("Goal Position\n    x: %f\n    y: %f\n    z: %f\n", goal_position[0], goal_position[1], goal_position[2]);
 
     try {
         throw_to(goal_position);
-        
+        ROS_INFO("Throw has been executed\n");
     } catch(std::string error) {
         ROS_ERROR("error: %s", error.c_str());
     }
+
     action_server->setSucceeded();
 }
 
 
-void generate_trajectory() {
+// Generate a standart trajectory
+void generate_standart_trajectory() {
     std::vector<double> throwing_velocity_vector = vectorize_throwing_velocity(1.0, throwing_angle); // Calculating a velocity vector with a speed of 1.0
     throwing_velocity_vector.push_back(0.0);
     throwing_velocity_vector.push_back(rotation_velocity);
@@ -374,24 +360,40 @@ void generate_trajectory() {
 
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "ludicrous_throw");
-    ros::AsyncSpinner spinner(4); // We use 4 threads for callbacks
-
+    ros::init(argc, argv, "throwing_node");
+    ros::AsyncSpinner spinner(2); // We use 2 threads for callbacks
     ros::NodeHandle node_handle;
 
+    // Setting up the move group interface
+    ROS_INFO("Initialising move group interface");
     moveit::planning_interface::MoveGroupInterface group(PLANNING_GROUP);
     move_group = &group;
+    ROS_INFO("Done initialising move group interface\n");
 
-    generate_trajectory();
+    // Generate a standart throwing trajecory
+    ROS_INFO("Generating standart trajectory");
+    generate_standart_trajectory();
+    ROS_INFO("Done generating standart trajectory\n");
 
-    actionlib::SimpleActionServer<lego_throw::throwingAction> server(node_handle, "throwing", boost::bind(&execute_throw, _1, &server), false);
+    // Setting up the action server
+    ROS_INFO("Initialising action server");
+    actionlib::SimpleActionServer<lego_throw::throwingAction> server(node_handle, "throwing", boost::bind(&execute_throw_callback, _1, &server), false);
     server.start();
+    ROS_INFO("Done initialising action server\n");
 
+    // Setting up gripper service
+    ROS_INFO("Initialising gripper service");
     ros::Subscriber gripper_state_subscriber = node_handle.subscribe("gripper_state", 10, gripper_state_callback);
+    ROS_INFO("Done initialising gripper service\n");
 
     spinner.start();
 
+    // Configure serial port
+    ROS_INFO("Configuring serial port for gripper");
     configure_serial_port();
+    ROS_INFO("Done configuring serial port for gripper\n");
+
+    ROS_INFO("Ready to throw!");
 
     ros::waitForShutdown();
 

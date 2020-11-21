@@ -305,9 +305,7 @@ void throw_to(double position[3]) {
 
     // throw the object 
     move_group->asyncExecute(scaled_trajectory);
-    //move_group->asyncExecute(trajectory2);
 
-    //ros::Duration((acceleration_time / velocity) * 1.08).sleep();
     ros::Duration((acceleration_time / velocity) - 0.02).sleep();
 
     set_gripper_state(true);

@@ -8,6 +8,7 @@
 #include <geometry_msgs/Vector3.h>
 #include <ros/ros.h>
 #include "lego_throw/camera.h"
+#include <cmath>
 
 #include <typeinfo>
 #include <iostream>
@@ -27,6 +28,7 @@ struct Frame {
     uint width{};
     cv::Mat matImage;
     uint32_t count = 0;
+    uint32_t rotationAngle = 0;
 };
 
 // Add names for QR codes here if you add more QR codes to scene
@@ -35,7 +37,8 @@ struct Frame {
         "ID_2",
         "ID_3",
         "ID_4",
-        "ID_5"
+        "ID_5", 
+        "Base_coord"
 };
 
 std::vector <Object> customQRDetected; 
@@ -70,8 +73,7 @@ void decode(cv::Mat &im, std::vector <Object> &decodedObjects) {
 
     // Convert image to grayscale
     cv::Mat imGray;
-    cvtColor(im, imGray, cv::
-    COLOR_BGR2GRAY);
+    cvtColor(im, imGray, cv::COLOR_BGR2GRAY);
 
     // Wrap image data in a zbar image
     zbar::Image image(im.cols, im.rows, "Y800", (uchar *) imGray.data, im.cols * im.rows);
@@ -84,20 +86,96 @@ void decode(cv::Mat &im, std::vector <Object> &decodedObjects) {
         Object obj;
         obj.data = symbol->get_data();
         
+
         // Obtain location
         for (int i = 0; i < symbol->get_location_size(); i++) {
             obj.location.emplace_back(symbol->get_location_x(i), symbol->get_location_y(i));
         }
 
+    float m1, m2;
         // calculate center coords
         int sumX = 0, sumY = 0;
-        for (auto &i : obj.location) {
-            sumX += i.x;
-            sumY += i.y;
+        for (int i = 0; i < obj.location.size(); i++) {
+
+                //printf("x = %d, y = %d , count = %d \n", obj.location[i].x, obj.location[i].y, i);
+
+            sumX += obj.location[i].x;
+            sumY += obj.location[i].y;
+
         }
+
+        if(obj.data == "ID_1"){
+                float x1, x2, y1, y2;
+
+                for (int i = 0; i < obj.location.size(); i++){
+
+                    if(i == 0){
+
+                    x1 = obj.location[i].x;
+                    y1 = obj.location[i].y;
+                    }
+
+                    if(i == 3){
+
+                    x2 = obj.location[i].x;
+                    y2 = obj.location[i].y;
+                    }
+
+                }
+                
+                // Finding slope for base QR
+                m1 = (y2 - y1) / (x2 - x1);
+                //printf("m1 = %f \n", m1);
+
+             }
+
+            if(obj.data == "ID_3"){
+
+            float x1, x2, y1, y2;
+
+              for (int x = 0; x < obj.location.size(); x++){
+
+                    if(x == 0){
+ 
+                    x1 = obj.location[x].x;
+                    y1 = obj.location[x].y;
+                    }
+                    
+                    if(x == 3){
+
+                    x2 = obj.location[x].x;
+                    y2 = obj.location[x].y;
+                    }
+
+                }
+
+
+             //Finding slope for base QR
+                m2 = (y2 - y1) / (x2 - x1);
+             }
+
+            
+        
+
+       // printf("m1 = %f, m2 = %f \n", m1, m2);
+
+    
+
+        // Finding angle
+        float tanTheta, theta;
+        // sqrt((m2 - m1)^2 / (1 + m1*m2))^2
+        //tanTheta = sqrt(pow((m2 - m1) / (1 + m1 * m2),2));
+        
+        theta = atan((m2 - m1) / (1 + m1*m2));
+
+        printf("angle between planes = %f \n", theta*180/3.1415);
+
+        printf("\n\n\n");
         obj.center.x = sumX / obj.location.size();
         obj.center.y = sumY / obj.location.size();
 
+
+        
         decodedObjects.push_back(obj);
     }
 }
@@ -135,7 +213,7 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
             amountQRCornersFound++;
         }
         if (objects[i].data == "03") {
-            cornersForPlane[amountQRCornersFound] = cv::Point2f(74, 71);
+            cornersForPlane[amountQRCornersFound] = cv::Point2f(71, 74);
             QrCamCoordinates[amountQRCornersFound] = objects[i].center;
             amountQRCornersFound++;
         }
@@ -177,8 +255,8 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
     cv::Mat hImage;
     //Warp source image to destination based on homography
     warpPerspective(colorImage, hImage, hMatrix, cv::Size(500, 500));
-    cv::namedWindow("homography", cv::WINDOW_FULLSCREEN);
-    cv::imshow("homography", hImage);
+    //cv::namedWindow("homography", cv::WINDOW_FULLSCREEN);
+   // cv::imshow("homography", hImage);
 
     // Check if packaging QR codes have been found
     for (int i = 0; i < objects.size(); i++) {
@@ -203,7 +281,9 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
 
             // Multiply point with homography matrix
             perspectiveTransform(yeetPoints, yeetPoints, hMatrix);
-            printf("%s coordinates: %f, %f\n", objects[i].data.c_str(), yeetPoints[0].x, yeetPoints[0].y);
+           // printf("%s coordinates: %f, %f\n", objects[i].data.c_str(), yeetPoints[0].x, yeetPoints[0].y);
+           
+
 
             float xRobotOffset = -28; //cm
             float yRobotOffset = 73; // cm
@@ -218,8 +298,11 @@ void doHomography(const std::vector <Object> objects, cv::Mat colorImage) {
             camSrv.request.y = yWithOffsetInMeters;
             camSrv.request.z = 0.045;
             camSrv.request.data = *it;
+
+
+            //printf("x= %f, y=%f \n", camSrv.request.x, camSrv.request.y);
             
-            printf("working1\n");
+           // printf("working1\n");
             if (client.call(camSrv)) printf("Response status: %i\n", camSrv.response.status);
         }
     }
@@ -239,12 +322,11 @@ int main(int argc, char *argv[]) {
     // --- ROS STUFF
     ros::init(argc, argv, "realsenseVision");
     ros::NodeHandle node_handle;
-   // yeetLocationPublisher = node_handle.advertise<geometry_msgs::Vector3>("box_position", 1000);
 
     //Creating the client
     client = node_handle.serviceClient<lego_throw::camera>("camera");
-    client.waitForExistence();
-  
+    //client.waitForExistence();
+   
     // QR CODES STUFF
     printf("Start filming the scene\n");
     while (ros::ok()) {

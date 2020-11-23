@@ -75,6 +75,8 @@ add_service_files(
 ## Generate actions in the 'action' folder
 add_action_files(
   DIRECTORY
+  action
+  
   FILES
   pick_option.action
   throwing.action
@@ -220,14 +222,23 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(ludicrousThrow src/ludicrousThrow.cpp)
-target_link_libraries(ludicrousThrow ${catkin_LIBRARIES})
+add_executable(throwing_node src/throwing_node.cpp)
+add_dependencies(throwing_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
+target_link_libraries(throwing_node ${catkin_LIBRARIES})
 
 add_executable(master_node src/master_node.cpp)
+add_dependencies(master_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
 target_link_libraries(master_node ${catkin_LIBRARIES} nlohmann_json)
 
 add_executable(picking_node src/picking_node.cpp)
+add_dependencies(picking_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
 target_link_libraries(picking_node ${catkin_LIBRARIES})
 
+<<<<<<< HEAD
 add_executable(realsenseD435 src/realsenseD435.cpp)
 target_link_libraries(realsenseD435 ${catkin_LIBRARIES} realsense2 -lzbar)
+=======
+# add_executable(camera_node src/camera_node.cpp)
+# add_dependencies(camera_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
+# target_link_libraries(camera_node ${catkin_LIBRARIES} realsense2 -lzbar)
+>>>>>>> 13cbc8e3d2931dd3ff98e6599b480f13e6f8aa2c

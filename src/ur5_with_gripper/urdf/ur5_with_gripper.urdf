@@ -319,7 +319,7 @@
     <parent link="tool0"/>
     <child link="gripper"/>
     <!-- The tool is directly attached to the flange. -->
-    <origin rpy="0 0 1.57079632679" xyz="0 0 0"/>
+    <origin rpy="1.570796326794897 0 1.570796326794897" xyz="0 0 0.04"/>
   </joint>
   <link name="gripper">
     <visual>
@@ -327,6 +327,9 @@
         <!-- The path to the visual meshes in the package. -->
         <mesh filename="package://ur5_with_gripper/meshes/visual/gripper_tool.stl"/>
       </geometry>
+      <material name="almostWhite">
+        <color rgba="0.9 0.9 0.9 1.0"/>
+      </material>
     </visual>
     <collision>
       <geometry>
@@ -337,7 +340,7 @@
   </link>
   <!-- TCP frame -->
   <joint name="tcp_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.15"/>
+    <origin rpy="0 0 0" xyz="0 0.15 0"/>
     <parent link="gripper"/>
     <child link="tcp"/>
   </joint>

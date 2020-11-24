@@ -17,5 +17,5 @@
   "ID_5": [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
             {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375},
             {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375},
-            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375}],          
+            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375}]        
 }

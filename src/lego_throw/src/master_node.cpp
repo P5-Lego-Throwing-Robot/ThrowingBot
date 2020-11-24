@@ -29,12 +29,24 @@ bool box_id_callback(lego_throw::camera::Request  &req,
         for (int i =0 ; i<4; i++){
         box_id temp_box;
 
+        // Box center coordinates:
+        float x_c = req.x;
+        float y_c = req.y;
+
+        // Corner offset:
+        float x_offset = order[req.data][i]["OffsetX"];
+        float y_offset = order[req.data][i]["OffsetY"];
+
+        // Box id:
         temp_box.box_id = req.data;
-        temp_box.x = req.x;
-        temp_box.y = req.y;
+
+        // Throw coordinate:
+        temp_box.x = x_c + x_offset;
+        temp_box.y = y_c + y_offset;
         temp_box.z = req.z;
 
-        temp_box.option = order[req.data][i];
+        // Throw option:
+        temp_box.option = order[req.data][i]["option"];
 
         if(order.contains(temp_box.box_id))
         {

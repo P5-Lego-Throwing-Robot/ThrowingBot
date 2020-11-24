@@ -141,7 +141,7 @@ void calculateTransformation(cv::Point2f robot, cv::Point2f legoBox, double angl
 
 }
 
-double calculateAngle(std::vector<Object> transQR, cv::Mat hMat) {
+void calculateAngle(std::vector<Object> transQR, cv::Mat hMat) {
     Object orig, robot;
     if (transQR[0].data == "00") {
         orig = transQR[0];
@@ -209,8 +209,7 @@ double calculateAngle(std::vector<Object> transQR, cv::Mat hMat) {
     double robotOffset = 41;
     robotPoints[2].y += -41;
     calculateTransformation(robotPoints[2], legoBox[0] , angle);
-
-    return 0;
+    printf("Angle: %f\n", angle);
 }
 
 void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
@@ -321,20 +320,21 @@ void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
             // Push back the new detected QR code
             transQR.push_back(objects[i]);
 
+            // If we found orego, robot and a lego box.
             if (transQR.size() == 3) {
-                double angle = calculateAngle(transQR, hMatrix);
+                calculateAngle(transQR, hMatrix);
                 qrCustomNamesDetected.push_back(objects[i]);
+
+                lego_throw::camera camSrv;
+
+                camSrv.request.x = xWithOffsetInMeters;
+                camSrv.request.y = yWithOffsetInMeters;
+                camSrv.request.z = 0.045;
+                camSrv.request.data = *it;
+
+                if (client.call(camSrv)) printf("Response status: %i\n", camSrv.response.status);
             }
 
-
-            lego_throw::camera camSrv;
-
-            camSrv.request.x = xWithOffsetInMeters;
-            camSrv.request.y = yWithOffsetInMeters;
-            camSrv.request.z = 0.045;
-            camSrv.request.data = *it;
-
-            if (client.call(camSrv)) printf("Response status: %i\n", camSrv.response.status);
         }
     }
 

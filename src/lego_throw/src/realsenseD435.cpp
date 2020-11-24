@@ -63,6 +63,7 @@ void retrieveFrame(const rs2::pipeline &pipe, Frame *frame) {
     frame->count++;
 }
 
+
 // Find and decode barcodes and QR codes
 void decode(cv::Mat &im, std::vector<Object> &decodedObjects) {
 
@@ -77,8 +78,9 @@ void decode(cv::Mat &im, std::vector<Object> &decodedObjects) {
     cvtColor(im, imGray, cv::
     COLOR_BGR2GRAY);
 
+    cv::imshow("grey", imGray);
     // Wrap image data in a zbar image
-    zbar::Image image(im.cols, im.rows, "Y800", (uchar *) imGray.data, im.cols * im.rows);
+    zbar::Image image(im.cols, im.rows, "GREY", (uchar *) imGray.data, im.cols * im.rows);
 
     // Scan the image for barcodes and QRCodes
     int n = scanner.scan(image);
@@ -103,9 +105,99 @@ void decode(cv::Mat &im, std::vector<Object> &decodedObjects) {
         obj.center.y = sumY / obj.location.size();
 
         decodedObjects.push_back(obj);
+
     }
 }
 
+void calculateAngle(std::vector<Object> transQR, cv::Mat hMat) {
+    Object orig, robot;
+    if (transQR[0].data == "00") {
+        orig = transQR[0];
+        robot = transQR[1];
+    } else {
+        orig = transQR[1];
+        robot = transQR[0];
+    }
+
+    // Put origin points into vector
+    std::vector<cv::Point2f> origPoint(2);
+    origPoint[0].x = orig.location[0].x;
+    origPoint[0].y = orig.location[0].y;
+    origPoint[1].x = orig.location[3].x;
+    origPoint[1].y = orig.location[3].y;
+    // transform points
+    perspectiveTransform(origPoint, origPoint, hMat);      // Multiply point with homography matrix
+
+
+    // Put robot points into vector
+    std::vector<cv::Point2f> robotPoints(2);
+    robotPoints[0].x = robot.location[0].x;
+    robotPoints[0].y = robot.location[0].y;
+    robotPoints[1].x = robot.location[3].x;
+    robotPoints[1].y = robot.location[3].y;
+    // transform points
+    perspectiveTransform(robotPoints, robotPoints, hMat);      // Multiply point with homography matrix
+
+    // Calculate angle between planes
+    // First origin line
+    float m1, m2;
+    float x1, x2, y1, y2;
+
+    x1 = origPoint[0].x;
+    y1 = origPoint[0].y;
+    x2 = origPoint[1].x;
+    y2 = origPoint[1].y;
+
+    // Finding slope for base QR
+    m1 = (y2 - y1) / (x2 - x1);
+    //printf("m1 = %f \n", m1);
+
+
+    x1 = robotPoints[0].x;
+    y1 = robotPoints[0].y;
+    x2 = robotPoints[1].x;
+    y2 = robotPoints[1].y;
+
+    //Finding slope for base QR
+    m2 = (y2 - y1) / (x2 - x1);
+
+    float theta;
+    theta = atan((m2 - m1) / (1 + m1 * m2));
+    printf("angle between planes = %f \n", theta * 180 / 3.1415);
+
+}
+
+void calculateTransformation(cv::Point2f robot, cv::Point2f legoBox, double angle) {
+
+    // Given we know:
+    // -- where the robot QR code is
+    // -- the orientation of the Robot QR code
+    boost::numeric::ublas::vector<double> aP(2);        // Location of LEGO box from table frame
+    aP[0] = 30;
+    aP[1] = 30;
+    boost::numeric::ublas::vector<double> aPBorg(2);    // Location of Robot Oregon
+    aPBorg[0] = -10;
+    aPBorg[1] = 60;
+    boost::numeric::ublas::vector<double> bP(2);        // Location of LEGO box from Robot frame
+
+    // Rotate (angle) around z-axis.
+
+    // Initiate 2x2 matrix
+    boost::numeric::ublas::matrix<double> mat(2, 2);
+    // populate rotation matrix
+    mat(0, 0) = cos(angle);
+    mat(0, 1) = -sin(angle);
+    mat(1, 0) = sin(angle);
+    mat(0, 1) = cos(angle);
+
+    // Transpose matrix because we need the inverse
+    mat = boost::numeric::ublas::trans(mat);
+    // Multiply using eq: 2.17 in robotics book isolated for bP.
+    bP = boost::numeric::ublas::prod(mat, aP) - boost::numeric::ublas::prod(mat, aPBorg);
+
+    std::cout << bP << std::endl;
+
+}
 
 void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
     // Find homography matrix needs 8 points.
@@ -120,22 +212,22 @@ void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
     //ROBOT TABLE POINTS
     for (int i = 0; i < objects.size(); ++i) {
         if (objects[i].data == "00") {
-            surfaceQR[amountQRCornersFound] = cv::Point2f(0, 0);
+            surfaceQR[amountQRCornersFound] = cv::Point2f(300, 500);
             cameraQR[amountQRCornersFound] = objects[i].center;
             amountQRCornersFound++;
         }
         if (objects[i].data == "01") {
-            surfaceQR[amountQRCornersFound] = cv::Point2f(71, 0);
+            surfaceQR[amountQRCornersFound] = cv::Point2f(1010, 500);
             cameraQR[amountQRCornersFound] = objects[i].center;
             amountQRCornersFound++;
         }
         if (objects[i].data == "02") {
-            surfaceQR[amountQRCornersFound] = cv::Point2f(0, 74);
+            surfaceQR[amountQRCornersFound] = cv::Point2f(300, 1240);
             cameraQR[amountQRCornersFound] = objects[i].center;
             amountQRCornersFound++;
         }
         if (objects[i].data == "03") {
-            surfaceQR[amountQRCornersFound] = cv::Point2f(71, 74);
+            surfaceQR[amountQRCornersFound] = cv::Point2f(1010, 1240);
             cameraQR[amountQRCornersFound] = objects[i].center;
             amountQRCornersFound++;
         }
@@ -168,11 +260,28 @@ void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
     */
     // If we didn't find 4 QR corners OR We didn't find any lego boxes
     // then stop executing and return to main loop
-    if (amountQRCornersFound != 4 || objects.size() < 5)
+    if (amountQRCornersFound != 4)
         return;
 
     //calculate Homography matrix from 4 sets of corresponding points
     cv::Mat hMatrix = findHomography(cameraQR, surfaceQR);
+
+    //cv::Mat homographyImage;
+    //warpPerspective(colorImage, homographyImage, hMatrix, cv::Size(800, 870));
+
+    // calculate transformation
+    std::vector<Object> transQR;
+    for (int i = 0; i < objects.size(); ++i) {
+        if (objects[i].data == "00") {
+            transQR.push_back(objects[i]);
+        }
+        if (objects[i].data == "ID_1") {
+            transQR.push_back(objects[i]);
+        }
+    }
+
+    if (transQR.size() == 2)
+    calculateAngle(transQR, hMatrix);
 
     // Check for the lego boxes QR codes.
     for (int i = 0; i < objects.size(); i++) {
@@ -199,6 +308,7 @@ void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
             float xWithOffsetInMeters = ((legoBox[0].x + (xRobotOffset))) / 100.0f;  // Apply offset
             float yWithOffsetInMeters = ((legoBox[0].y + yRobotOffset)) / 100.0f;    // Apply offset
 
+            //calculateTransformation()
 
             lego_throw::camera camSrv;
 
@@ -214,42 +324,7 @@ void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
 }
 
 
-void calculateTransformation() {
-
-    // Given we know:
-    // -- where the robot QR code is
-    // -- the orientation of the Robot QR code
-    boost::numeric::ublas::vector<double> aP(2);        // Location of LEGO box from table frame
-    aP[0] = 30;
-    aP[1] = 30;
-    boost::numeric::ublas::vector<double> aPBorg(2);    // Location of Robot Oregon
-    aPBorg[0] = -10;
-    aPBorg[1] = 60;
-    boost::numeric::ublas::vector<double> bP(2);        // Location of LEGO box from Robot frame
-
-    // Rotate (angle) around z-axis.
-    double angle = M_PI_2;
-
-    // Initiate 2x2 matrix
-    boost::numeric::ublas::matrix<double> mat(2, 2);
-    // populate rotation matrix
-    mat(0, 0) = cos(angle);
-    mat(0, 1) = -sin(angle);
-    mat(1, 0) = sin(angle);
-    mat(0, 1) = cos(angle);
-
-    // Transpose matrix because we need the inverse
-    mat = boost::numeric::ublas::trans(mat);
-    // Multiply using eq: 2.17 in robotics book isolated for bP.
-    bP = boost::numeric::ublas::prod(mat, aP) - boost::numeric::ublas::prod(mat, aPBorg);
-
-    std::cout << bP << std::endl;
-
-}
-
 int main(int argc, char *argv[]) {
-
-    calculateTransformation();
 
     // -- REALSENSE SETUP --
     // Declare RealSense pipeline, encapsulating the actual device and sensors
@@ -263,11 +338,12 @@ int main(int argc, char *argv[]) {
 
     // Creating the client
     client = node_handle.serviceClient<lego_throw::camera>("camera");
-    client.waitForExistence();
+    //client.waitForExistence();
 
     // --- GROUP 563 ---
     Frame frame;                               // Place to store realsense frames
     std::vector<Object> decodedObjects;       // A vector to store scanned QR codes in
+
 
     printf("Start filming the scene\n");
     while (ros::ok()) {
@@ -281,7 +357,7 @@ int main(int argc, char *argv[]) {
 
         cvtColor(frame.matImage, frame.matImage, cv::COLOR_BGR2RGB);      // Convert to RGB to display correct colors
         cv::imshow("Image", frame.matImage);                           // Display image for user feedback
-
+        cv::imwrite("/home/magnus/ThrowingBot/camerafile.png", frame.matImage);
         if (cv::waitKey(25) == 27) break;                                // If ESC is pushed then break loop
 
         decodedObjects.clear();                                                // Reset vector of scanned QR codes

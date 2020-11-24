@@ -77,7 +77,6 @@ void decode(cv::Mat &im, std::vector<Object> &decodedObjects) {
     cvtColor(im, imGray, cv::
     COLOR_BGR2GRAY);
 
-    cv::imshow("grey", imGray);
     // Wrap image data in a zbar image
     zbar::Image image(im.cols, im.rows, "GREY", (uchar *) imGray.data, im.cols * im.rows);
 
@@ -374,7 +373,6 @@ int main(int argc, char *argv[]) {
 
         cvtColor(frame.matImage, frame.matImage, cv::COLOR_BGR2RGB);      // Convert to RGB to display correct colors
         cv::imshow("Image", frame.matImage);                           // Display image for user feedback
-        cv::imwrite("/home/magnus/ThrowingBot/camerafile.png", frame.matImage);
         if (cv::waitKey(25) == 27) break;                                // If ESC is pushed then break loop
 
         decodedObjects.clear();                                                // Reset vector of scanned QR codes

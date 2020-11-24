@@ -65,7 +65,7 @@ Eigen::Isometry3d forward_kinematics(std::vector<double> joint_values) {
     moveit::core::RobotStatePtr kinematic_state(new moveit::core::RobotState(kinematic_model));
     const moveit::core::JointModelGroup* joint_model_group = kinematic_model->getJointModelGroup(PLANNING_GROUP);
     kinematic_state->setJointGroupPositions(joint_model_group, joint_values);
-    const Eigen::Isometry3d& end_effector_state = kinematic_state->getGlobalLinkTransform("ee_link");
+    const Eigen::Isometry3d& end_effector_state = kinematic_state->getGlobalLinkTransform("tcp");
     return end_effector_state;
 }
 

@@ -8,6 +8,7 @@
 #include <lego_throw/throwingAction.h>
 #include <actionlib/client/simple_action_client.h>
 #include <lego_throw/camera.h>
+#include <moveit_msgs/ExecuteTrajectoryAction.h>
 
 struct box_id {
     std::string box_id;
@@ -21,6 +22,7 @@ struct box_id {
 // Global variables: 
 nlohmann::json order;
 std::vector<box_id> box_id_queue; 
+int trajectory_status = 3;
 
 
 // Callback function:
@@ -88,6 +90,14 @@ bool load_json(std::string path, nlohmann::json &json_object)
         return true;
     }
 
+// Update trajectory status to avoid overlapping trajectories:
+void execute_trajectory_callback(const moveit_msgs::ExecuteTrajectoryActionFeedbackConstPtr &msg)
+{
+    actionlib_msgs::GoalStatus feedback = msg->status;
+    trajectory_status = int(feedback.status);
+    //std::cout << "New trajectory status: " << trajectory_status << std::endl;
+}
+
 
 int main(int argc, char **argv)
 {
@@ -96,6 +106,9 @@ int main(int argc, char **argv)
 
     // Service server:
     ros::ServiceServer service = node_handle.advertiseService("camera", box_id_callback);
+
+    // Subscribe to feedback from trajectory executioner to avoid overlapping trajectories:
+    ros::Subscriber execute_sub = node_handle.subscribe("/execute_trajectory/feedback", 1, execute_trajectory_callback);
 
     // Action clients:
     actionlib::SimpleActionClient<lego_throw::pick_optionAction> picking_client("pick_option", true);
@@ -138,8 +151,8 @@ int main(int argc, char **argv)
                 state = 1;
             }
             
-            // Sending picking goal if one has not been set before:
-            if (state == 1) 
+            // Sending picking goal if one has not been set before and the throwing node is finished (trajectory_status == 3):
+            if (state == 1 && trajectory_status == 3) 
             {
                 ROS_INFO("SENDING PICKING GOAL!");
                 picking_client.sendGoal(pick_option_goal);

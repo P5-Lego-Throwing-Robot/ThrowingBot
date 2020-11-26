@@ -1,21 +1,35 @@
 {
-  "ID_2": [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
+  "ID_2":   {"name": "LEGO Star Wars Sandcrawler", 
+            "bags": 9,
+	    "item": 
+            [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
             {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375},
             {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375},
-            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375}],
-            
-  "ID_3": [{"option": "1", "OffsetX": -0.0, "OffsetY": 0.0},
+            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375},
+            {"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
             {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375},
             {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375},
-            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375}],
+            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375},
+            {"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375}]},
     
-  "ID_4": [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
+  "ID_3":   {"name": "LEGO Star Wars Cloud-Rider Swoop Bikes",
+            "bags": 3, 
+            "item": 
+            [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
             {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375},
-            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375},
-            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375}],
-           
-  "ID_5": [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
+            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375}]},  
+            
+  "ID_4":   {"name": "LEGO The Movie 2", 
+            "bags": 3,
+	    "item": 
+            [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
             {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375},
-            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375},
-            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375}]        
+            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375}]},
+            
+  "ID_5":   {"name": "Frozen 2", 
+            "bags": 2,
+	    "item": 
+            [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
+            {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375}]}
+            
 }

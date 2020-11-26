@@ -108,7 +108,7 @@ void decode(cv::Mat &im, std::vector<Object> &decodedObjects) {
 }
 
 
-void calculateTransformation(cv::Point2f robot, cv::Point2f legoBox, double angle) {
+cv::Point2f calculateTransformation(cv::Point2f robot, cv::Point2f legoBox, double angle) {
 
     // Given we know:
     // -- where the robot QR code is
@@ -135,12 +135,14 @@ void calculateTransformation(cv::Point2f robot, cv::Point2f legoBox, double angl
     mat = boost::numeric::ublas::trans(mat);
     // Multiply using eq: 2.17 in robotics book isolated for bP.
     bP = boost::numeric::ublas::prod(mat, aP) - boost::numeric::ublas::prod(mat, aPBorg);
+    cv::Point2f point;
 
-    std::cout << bP << std::endl;
-
+    point.x = bP[0];
+    point.y = bP[1];
+    return point;
 }
 
-void calculateAngle(std::vector<Object> transQR, cv::Mat hMat) {
+cv::Point2f calculateAngle(std::vector<Object> transQR, cv::Mat hMat) {
     Object orig, robot;
     if (transQR[0].data == "00") {
         orig = transQR[0];
@@ -199,7 +201,6 @@ void calculateAngle(std::vector<Object> transQR, cv::Mat hMat) {
 
     // return angle
     double angle = atan((m2 - m1) / (1 + m1 * m2));
-
     // Get the lego box location transformed
     std::vector<cv::Point2f> legoBox = {transQR[2].center};
     perspectiveTransform(legoBox, legoBox, hMat);      // Multiply point with homography matrix
@@ -207,8 +208,10 @@ void calculateAngle(std::vector<Object> transQR, cv::Mat hMat) {
     // Remember to add offset between robot and QRd
     double robotOffset = 41;
     robotPoints[2].y += -41;
-    calculateTransformation(robotPoints[2], legoBox[0] , angle);
+    cv::Point2f point = calculateTransformation(robotPoints[2], legoBox[0] , angle);
     printf("Angle: %f\n", angle);
+
+    return point;
 }
 
 void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
@@ -321,14 +324,18 @@ void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
 
             // If we found orego, robot and a lego box.
             if (transQR.size() == 3) {
-                calculateAngle(transQR, hMatrix);
+                cv::Point2f point = calculateAngle(transQR, hMatrix);
                 qrCustomNamesDetected.push_back(objects[i]);
+                point.x = point.x / 100;
+                point.y = point.y / 100;
+
+                printf("Position (x, y): %f, %f\n", point.x, point.y);
 
                 lego_throw::camera camSrv;
 
-                camSrv.request.x = xWithOffsetInMeters;
-                camSrv.request.y = yWithOffsetInMeters;
-                camSrv.request.z = 0.045;
+                camSrv.request.x = point.x;
+                camSrv.request.y = point.y;
+                camSrv.request.z = 0.135;
                 camSrv.request.data = *it;
 
                 if (client.call(camSrv)) printf("Response status: %i\n", camSrv.response.status);
@@ -354,7 +361,7 @@ int main(int argc, char *argv[]) {
 
     // Creating the client
     client = node_handle.serviceClient<lego_throw::camera>("camera");
-    //client.waitForExistence();
+    client.waitForExistence();
 
     // --- GROUP 563 ---
     Frame frame;                               // Place to store realsense frames
@@ -364,8 +371,7 @@ int main(int argc, char *argv[]) {
     printf("Start filming the scene\n");
     while (ros::ok()) {
 
-        retrieveFrame(pipe,
-                      &frame);                                            // Get a set of frames from realsense Camera
+        retrieveFrame(pipe, &frame);                                            // Get a set of frames from realsense Camera
         decode(frame.matImage, decodedObjects);                           // Scan image for QR codes
 
         if (decodedObjects.size() > 3)                                          // If we have 4 or more QR codes then -

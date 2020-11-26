@@ -7,13 +7,13 @@
 	</include>
 
 	<include file="$(find lego_throw)/launch/ur5_moveit_planning_execution.launch"/>
-	
+
 	<include file="$(find lego_throw)/launch/moveit_rviz.launch">
 		<arg name="config" default="true" />
 	</include>
 
 	<node pkg="lego_throw" type="throwing_node" name="throwing_node"/>
 	<node pkg="lego_throw" type="picking_node" name="picking_node"/>
-        <node pkg="lego_throw" type="master_node" name="master_node" output="screen"/>
+	<node pkg="lego_throw" type="master_node" name="master_node" output="screen"/>
 
 </launch>

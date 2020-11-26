@@ -1,44 +1,21 @@
 {
-  "ID_1": [
-    "R",
-    "B",
-    "G",
-    "Y"
-  ],
-  "ID_2": [
-    "B",
-    "R",
-    "Y",
-    "G"
-  ],
-  "ID_3": [
-    "G",
-    "B",
-    "R",
-    "Y"
-  ],
-  "ID_4": [
-    "Y",
-    "B",
-    "R",
-    "G"
-  ],
-  "ID_5": [
-    "Y",
-    "B",
-    "G",
-    "R"
-  ],
-  "ID_6": [
-    "G",
-    "R",
-    "B",
-    "Y"
-  ],
-  "ID_7": [
-    "G",
-    "B",
-    "Y",
-    "R"
-  ]
+  "ID_2": [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
+            {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375},
+            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375},
+            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375}],
+            
+  "ID_3": [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
+            {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375},
+            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375},
+            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375}],
+    
+  "ID_4": [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
+            {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375},
+            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375},
+            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375}],
+           
+  "ID_5": [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375},
+            {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375},
+            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375},
+            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375}]        
 }

@@ -62,7 +62,7 @@
     <child link="upper_arm_link"/>
     <origin rpy="1.57014952537 0 -8.86599135679e-05" xyz="0.000126929179948 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit effort="150.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.15"/>
+    <limit effort="150.0" lower="-6.14159265359" upper="6.14159265359" velocity="3.15"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
   <link name="upper_arm_link">
@@ -92,7 +92,7 @@
     <child link="forearm_link"/>
     <origin rpy="0.00031414157897 0.00140768900099 5.00595691863e-05" xyz="-0.42539486463 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit effort="150.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.15"/>
+    <limit effort="150.0" lower="-6.14159265359" upper="6.14159265359" velocity="3.15"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
   <link name="forearm_link">
@@ -122,7 +122,7 @@
     <child link="wrist_1_link"/>
     <origin rpy="3.13697616422 3.14133001223 3.14154800701" xyz="-0.392367840625 0.000509259142546 0.110312292299"/>
     <axis xyz="0 0 1"/>
-    <limit effort="28.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.2"/>
+    <limit effort="28.0" lower="-6.14159265359" upper="6.14159265359" velocity="3.2"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
   <link name="wrist_1_link">
@@ -152,7 +152,7 @@
     <child link="wrist_2_link"/>
     <origin rpy="1.56992636792 0 2.78225517996e-05" xyz="7.62616716907e-05 -0.0947289399558 8.24103026857e-05"/>
     <axis xyz="0 0 1"/>
-    <limit effort="28.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.2"/>
+    <limit effort="28.0" lower="-6.14159265359" upper="6.14159265359" velocity="3.2"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
   <link name="wrist_2_link">
@@ -182,7 +182,7 @@
     <child link="wrist_3_link"/>
     <origin rpy="1.57144257568 3.14159265359 -3.14154655116" xyz="1.98429855564e-05 0.082401578253 5.32519358801e-05"/>
     <axis xyz="0 0 1"/>
-    <limit effort="28.0" lower="-3.14159265359" upper="3.14159265359" velocity="3.2"/>
+    <limit effort="28.0" lower="-6.14159265359" upper="6.14159265359" velocity="3.2"/>
     <dynamics damping="0.0" friction="0.0"/>
   </joint>
   <link name="wrist_3_link">
@@ -319,7 +319,7 @@
     <parent link="tool0"/>
     <child link="gripper"/>
     <!-- The tool is directly attached to the flange. -->
-    <origin rpy="1.5708 0 0.0" xyz="0 0 0"/>
+    <origin rpy="1.570796326794897 0 1.570796326794897" xyz="0 0 0.04"/>
   </joint>
   <link name="gripper">
     <visual>
@@ -337,7 +337,7 @@
   </link>
   <!-- TCP frame -->
   <joint name="tcp_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.15"/>
+    <origin rpy="0 0 0" xyz="0 0.15 0"/>
     <parent link="gripper"/>
     <child link="tcp"/>
   </joint>

@@ -84,13 +84,13 @@ bool pick_bag(std::string option)
     
     //Moving to inital pick position before opening gripper
     ROS_INFO("MOVING TO INITIAL PICK POSITION");
-    if (option == "R")
+    if (option == "1")
         group->setJointValueTarget(red_bag_init);
-    if (option == "G")
+    if (option == "2")
         group->setJointValueTarget(green_bag_init);
-    if (option == "B")
+    if (option == "3")
         group->setJointValueTarget(blue_bag_init);
-    if (option == "Y")
+    if (option == "4")
         group->setJointValueTarget(yellow_bag_init);
     group->move();
 
@@ -100,13 +100,13 @@ bool pick_bag(std::string option)
 
     //Depening on the bag option chosen the manipulator will choose the joint values to move to
     ROS_INFO("PICKING OPTION %s", option.c_str());
-    if (option == "R")
+    if (option == "1")
         group->setJointValueTarget(red_bag);
-    if (option == "G")
+    if (option == "2")
         group->setJointValueTarget(green_bag);
-    if (option == "B")
+    if (option == "3")
         group->setJointValueTarget(blue_bag);
-    if (option == "Y")
+    if (option == "4")
         group->setJointValueTarget(yellow_bag);
     group->move();
     //When the manipulator has reached the bag, close the gripper
@@ -115,13 +115,13 @@ bool pick_bag(std::string option)
 
     //Move back to initial pick position before initation throw
     ROS_INFO("MOVING BACK TO INITIAL PICK POSITION");
-    if (option == "R")
+    if (option == "1")
         group->setJointValueTarget(red_bag_init);
-    if (option == "G")
+    if (option == "2")
         group->setJointValueTarget(green_bag_init);
-    if (option == "B")
+    if (option == "3")
         group->setJointValueTarget(blue_bag_init);
-    if (option == "Y")
+    if (option == "4")
         group->setJointValueTarget(yellow_bag_init);
     group->move();
 

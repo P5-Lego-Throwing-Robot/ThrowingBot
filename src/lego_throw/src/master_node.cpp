@@ -38,6 +38,7 @@ bool box_id_callback(lego_throw::camera::Request  &req,
             // Box center coordinates:
             float x_c = req.x;
             float y_c = req.y;
+            float z_c = req.z;
 
             for (int i = 0; i < order[req.data]["bags"]; i++) 
             {
@@ -45,6 +46,8 @@ bool box_id_callback(lego_throw::camera::Request  &req,
                 // Corner offset:
                 float x_offset = float(order[req.data]["item"][i]["OffsetX"]);
                 float y_offset = float(order[req.data]["item"][i]["OffsetY"]);
+                float z_offset = float(order[req.data]["item"][i]["OffsetZ"]);
+
 
                 // Box id:
                 temp_box.box_id = req.data + ", bag: " + std::to_string(i + 1);
@@ -52,7 +55,7 @@ bool box_id_callback(lego_throw::camera::Request  &req,
                 // Throw coordinate:
                 temp_box.x = x_c + x_offset;
                 temp_box.y = y_c + y_offset;
-                temp_box.z = req.z;
+                temp_box.z = z_c + z_offset;
 
                 // Throw option:
                 temp_box.option = order[req.data]["item"][i]["option"];
@@ -60,7 +63,7 @@ bool box_id_callback(lego_throw::camera::Request  &req,
                 box_id_queue.push_back(temp_box);
             }
 
-            std::cout << req.data << " ("<< order[req.data]["name"] << ", "  << order[req.data]["bags"] << " bags) " << " was added to the processing queue." << "\n";
+            std::cout << req.data << " ("<< order[req.data]["name"] << ", "  << order[req.data]["bags"] << " bags, XYZ: (" << x_c << ", " << y_c << ", " << z_c << ")) was added to the processing queue." << "\n";
         }
         else 
         {

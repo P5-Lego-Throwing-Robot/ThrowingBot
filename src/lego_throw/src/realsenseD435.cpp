@@ -122,8 +122,6 @@ cv::Point2f calculateTransformation(cv::Point2f robot, cv::Point2f legoBox, doub
     boost::numeric::ublas::vector<double> bP(2);        // Location of LEGO box from Robot frame
 
     // Rotate (angle) around z-axis.
-
-    // Initiate 2x2 matrix
     boost::numeric::ublas::matrix<double> mat(2, 2);
     // populate rotation matrix
     mat(0, 0) = cos(angle);
@@ -135,8 +133,9 @@ cv::Point2f calculateTransformation(cv::Point2f robot, cv::Point2f legoBox, doub
     mat = boost::numeric::ublas::trans(mat);
     // Multiply using eq: 2.17 in robotics book isolated for bP.
     bP = boost::numeric::ublas::prod(mat, aP) - boost::numeric::ublas::prod(mat, aPBorg);
-    cv::Point2f point;
 
+    // Putting point bP back to a cv::Point Object
+    cv::Point2f point;
     point.x = bP[0];
     point.y = bP[1];
     return point;
@@ -199,22 +198,28 @@ cv::Point2f calculateAngle(std::vector<Object> transQR, cv::Mat hMat) {
     //Finding slope for base QR
     m2 = (y2 - y1) / (x2 - x1);
 
-    // return angle
     double angle = atan((m2 - m1) / (1 + m1 * m2));
+    printf("Angle: %f\n", angle);
     // Get the lego box location transformed
     std::vector<cv::Point2f> legoBox = {transQR[2].center};
     perspectiveTransform(legoBox, legoBox, hMat);      // Multiply point with homography matrix
 
     // Remember to add offset between robot and QRd
-    double robotOffset = 41;
     robotPoints[2].y += -41;
-    cv::Point2f point = calculateTransformation(robotPoints[2], legoBox[0] , angle);
-    printf("Angle: %f\n", angle);
 
-    return point;
+    return calculateTransformation(robotPoints[2], legoBox[0], angle);
 }
 
-void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
+void displayDots(cv::Mat *image, const cv::Point2f& centerBase, const cv::Point2f& centerQR, const cv::Mat &hMatrix) {
+
+    std::string label = "     (" + std::to_string(centerBase.x).substr(0, std::to_string(centerBase.x).size() - 3) + ", " +
+                        std::to_string(centerBase.y).substr(0, std::to_string(centerBase.y).size() - 3) + ")";
+
+    cv::circle(*image, centerQR, 4, cv::Scalar(0, 0, 255), 8);
+    cv::putText(*image, label, centerQR, cv::FONT_HERSHEY_PLAIN, 1.0, cv::Scalar(0, 0, 0), 2);
+}
+
+void doHomography(const std::vector<Object> objects, cv::Mat *colorImage) {
     // Find homography matrix needs 8 points.
     std::vector<cv::Point2f> surfaceQR(4);     // Four corners of the real world plane
     std::vector<cv::Point2f> cameraQR(4);      // Four corners of the image plane
@@ -281,9 +286,9 @@ void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
     //calculate Homography matrix from 4 sets of corresponding points
     cv::Mat hMatrix = findHomography(cameraQR, surfaceQR);
 
+    // Display dots on the LEGO qr code
     //cv::Mat homographyImage;
     //warpPerspective(colorImage, homographyImage, hMatrix, cv::Size(800, 870));
-
 
     // Check for the lego boxes QR codes.
     for (int i = 0; i < objects.size(); i++) {
@@ -297,7 +302,7 @@ void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
                     qrCustomNamesDetected[j].data)   // It exists, then return to main loop, else continue with the new QR code
                     return;
             }
-          //  qrCustomNamesDetected.push_back(objects[i]);                     // Save new QR code so we dont repack same lego box
+            //  qrCustomNamesDetected.push_back(objects[i]);                     // Save new QR code so we dont repack same lego box
 
             std::vector<cv::Point2f> legoBox = {
                     objects[i].center};    // Load point in as a cv::Point2f because that's perspectiveTransform's input.
@@ -311,34 +316,39 @@ void doHomography(const std::vector<Object> objects, cv::Mat colorImage) {
 
             // calculate transformation
             std::vector<Object> transQR;
-            for (int i = 0; i < objects.size(); ++i) {
-                if (objects[i].data == "00") {
-                    transQR.push_back(objects[i]);
+            for (int j = 0; j < objects.size(); ++j) {
+                if (objects[j].data == "00") {
+                    transQR.push_back(objects[j]);
                 }
-                if (objects[i].data == "ID_1") {
-                    transQR.push_back(objects[i]);
+                if (objects[j].data == "ID_1") {
+                    transQR.push_back(objects[j]);
                 }
             }
             // Push back the new detected QR code
             transQR.push_back(objects[i]);
 
-            // If we found orego, robot and a lego box.
+            // If we found origin, robot and a lego box.
             if (transQR.size() == 3) {
                 cv::Point2f point = calculateAngle(transQR, hMatrix);
-                qrCustomNamesDetected.push_back(objects[i]);
+
                 point.x = point.x / 100;
                 point.y = point.y / 100;
-
                 printf("Position (x, y): %f, %f\n", point.x, point.y);
+
+                displayDots(colorImage, point, objects[i].center, hMatrix);
+
+                //qrCustomNamesDetected.push_back(objects[i]);
+
+
 
                 lego_throw::camera camSrv;
 
                 camSrv.request.x = point.x;
                 camSrv.request.y = point.y;
-                camSrv.request.z = 0.135;
+                camSrv.request.z = 0.05;
                 camSrv.request.data = *it;
 
-                if (client.call(camSrv)) printf("Response status: %i\n", camSrv.response.status);
+                // if (client.call(camSrv)) printf("Response status: %i\n", camSrv.response.status);
             }
 
         }
@@ -361,7 +371,7 @@ int main(int argc, char *argv[]) {
 
     // Creating the client
     client = node_handle.serviceClient<lego_throw::camera>("camera");
-    client.waitForExistence();
+    //client.waitForExistence();
 
     // --- GROUP 563 ---
     Frame frame;                               // Place to store realsense frames
@@ -371,11 +381,12 @@ int main(int argc, char *argv[]) {
     printf("Start filming the scene\n");
     while (ros::ok()) {
 
-        retrieveFrame(pipe, &frame);                                            // Get a set of frames from realsense Camera
+        retrieveFrame(pipe,
+                      &frame);                                            // Get a set of frames from realsense Camera
         decode(frame.matImage, decodedObjects);                           // Scan image for QR codes
 
         if (decodedObjects.size() > 3)                                          // If we have 4 or more QR codes then -
-            doHomography(decodedObjects, frame.matImage);                       // -Calculate homography from QR codes
+            doHomography(decodedObjects, &frame.matImage);                       // -Calculate homography from QR codes
 
         cvtColor(frame.matImage, frame.matImage, cv::COLOR_BGR2RGB);      // Convert to RGB to display correct colors
         cv::imshow("Image", frame.matImage);                           // Display image for user feedback

@@ -2,34 +2,34 @@
   "ID_2":   {"name": "LEGO Star Wars Sandcrawler", 
             "bags": 9,
 	    "item": 
-            [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375, "OffsetZ": 0.05},
-            {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375, "OffsetZ": 0.05},
-            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375, "OffsetZ": 0.09},
-            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375, "OffsetZ": 0.09},
-            {"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375, "OffsetZ": 0.05},
-            {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375, "OffsetZ": 0.05},
-            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375, "OffsetZ": 0.09},
-            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375, "OffsetZ": 0.09},
-            {"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375, "OffsetZ": 0.05}]},
+            [{"option": "1", "OffsetX": -0.0, "OffsetY": 0.0, "OffsetZ": 0.0},
+            {"option": "2", "OffsetX": 0.0, "OffsetY": 0.0, "OffsetZ": 0.0},
+            {"option": "3", "OffsetX": -0.0, "OffsetY": -0.0, "OffsetZ": 0.0},
+            {"option": "4", "OffsetX": 0.0, "OffsetY": -0.0, "OffsetZ": 0.0},
+            {"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375, "OffsetZ": 0.09},
+            {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375, "OffsetZ": 0.09},
+            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375, "OffsetZ": 0.14},
+            {"option": "4", "OffsetX": 0.12, "OffsetY": -0.09375, "OffsetZ": 0.14},
+            {"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375, "OffsetZ": 0.09}]},
 
   "ID_3":   {"name": "LEGO Star Wars Cloud-Rider Swoop Bikes", 
-            "bags": 3,
-	    "item": 
-            [{"option": "1", "OffsetX": -0.12, "OffsetY": 0.09375, "OffsetZ": 0.05},
-            {"option": "2", "OffsetX": 0.12, "OffsetY": 0.09375, "OffsetZ": 0.05},
-            {"option": "3", "OffsetX": -0.12, "OffsetY": -0.09375, "OffsetZ": 0.05}]}, 
-
-  "ID_4":   {"name": "LEGO The Movie 2", 
             "bags": 3,
 	    "item": 
             [{"option": "1", "OffsetX": 0, "OffsetY": 0, "OffsetZ": 0.05},
             {"option": "2", "OffsetX": 0, "OffsetY": 0, "OffsetZ": 0.05},
             {"option": "3", "OffsetX": 0, "OffsetY": 0, "OffsetZ": 0.05}]}, 
 
-  "ID_5":   {"name": "Frozen 2", 
-            "bags": 2,
+  "ID_4":   {"name": "LEGO The Movie 2", 
+            "bags": 3,
 	    "item": 
-            [{"option": "1", "OffsetX": 0, "OffsetY": 0, "OffsetZ": 0.04},
-            {"option": "2", "OffsetX": 0, "OffsetY": 0, "OffsetZ": 0.04}]} 
+            [{"option": "1", "OffsetX": 0.06, "OffsetY": 0, "OffsetZ": 0.05},
+            {"option": "2", "OffsetX": 0, "OffsetY": 0, "OffsetZ": 0.05},
+            {"option": "3", "OffsetX": -0.06, "OffsetY": 0, "OffsetZ": 0.05}]}, 
+
+  "ID_5":   {"name": "Frozen 2", 
+            "bags": 1,
+	    "item": 
+            [{"option": "1", "OffsetX": 0, "OffsetY": 0, "OffsetZ": 0.0},
+            {"option": "2", "OffsetX": 0, "OffsetY": 0, "OffsetZ": 0.0}]} 
 }
 

@@ -28,13 +28,28 @@ moveit::planning_interface::MoveGroupInterface *move_group;
 moveit_msgs::RobotTrajectory trajectory;
 int serial_port = 0;
 
+/*
 // === parameters affecting the throwing trajectory ===
 // Start, throw and end positions in joint space. radians
 const std::vector<double> joint_position_start{0.0, -(M_PI*13)/16, -(M_PI*6)/16, -(M_PI*2)/16, M_PI/2, 0.0};
 const std::vector<double> joint_position_throw{0.0, -(M_PI*10)/16, -(M_PI*3)/16, (M_PI*1)/16, M_PI/2, 0.0};
 const std::vector<double> joint_position_end{0.0, -(M_PI*10)/16, -(M_PI*3)/16, (M_PI*1)/16, M_PI/2, 0.0};
 const double throwing_angle = (M_PI*3.0)/16; // The angle to throw in radians
-const double rotation_velocity = 1.7; // radians/sec rotation of object when throwing velocity is 1.0
+const double rotation_velocity = 1.3; // radians/sec rotation of object when throwing velocity is 1.0
+const double acceleration_time = 2.3; // Time it takes to accelerate from joint_position_start to joint_position_throw when throwing velocity = 1.0
+const double deceleration_time = 4.0; // Time it takes to decelerate from joint_position_throw to joint_position_end when throwing velocity = 1.0
+const int acceleration_waypoints = 100; // Number of waypoints in the acceleration phase
+const int deceleration_waypoints = 100; // Number of waypoints in the deceleration phase
+// === parameters affecting the throwing trajectory ===
+*/
+
+// === parameters affecting the throwing trajectory ===
+// Start, throw and end positions in joint space. radians
+const std::vector<double> joint_position_start{0.0, -(M_PI*13.5)/16, -(M_PI*6.5)/16, -(M_PI*2)/16, M_PI/2, 0.0};
+const std::vector<double> joint_position_throw{0.0, -(M_PI*10.5)/16, -(M_PI*3.5)/16, (M_PI*1)/16, M_PI/2, 0.0};
+const std::vector<double> joint_position_end{0.0, -(M_PI*10.5)/16, -(M_PI*3.5)/16, (M_PI*1)/16, M_PI/2, 0.0};
+const double throwing_angle = (M_PI*4.0)/16; // The angle to throw in radians
+const double rotation_velocity = 1.3; // radians/sec rotation of object when throwing velocity is 1.0
 const double acceleration_time = 2.3; // Time it takes to accelerate from joint_position_start to joint_position_throw when throwing velocity = 1.0
 const double deceleration_time = 4.0; // Time it takes to decelerate from joint_position_throw to joint_position_end when throwing velocity = 1.0
 const int acceleration_waypoints = 100; // Number of waypoints in the acceleration phase
@@ -43,7 +58,8 @@ const int deceleration_waypoints = 100; // Number of waypoints in the decelerati
 
 // Constants
 const double return_to_start_acceleration_scale = 0.7;
-const double l2 = 0.1053; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
+//const double l2 = 0.1053; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
+const double l2 = 0.07; // end-effector offset from x-axis when J0 = 0. used in get_joint_one_angle()
 const double g = -9.816;
 const std::vector<double> zero_velocity_vector{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 const std::string PLANNING_GROUP = "manipulator";

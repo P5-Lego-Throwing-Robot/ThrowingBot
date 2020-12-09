@@ -347,14 +347,14 @@ void doHomography(const std::vector<Object> objects, cv::Mat *colorImage) {
                 displayDots(colorImage, point, objects[i].center, hMatrix);
 
                 printf("Position (x, y): %f, %f\n", point.x, point.y);
-                qrCustomNamesDetected.push_back(objects[i]);
+                //qrCustomNamesDetected.push_back(objects[i]);
 
                 lego_throw::camera camSrv;
                 camSrv.request.x = point.x;
                 camSrv.request.y = point.y;
                 camSrv.request.z = 0.05;
                 camSrv.request.data = *it;
-                if (client.call(camSrv)) printf("Response status: %i\n", camSrv.response.status);
+                //if (client.call(camSrv)) printf("Response status: %i\n", camSrv.response.status);
 
             }
         }

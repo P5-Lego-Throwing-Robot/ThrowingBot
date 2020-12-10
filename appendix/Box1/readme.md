@@ -8,9 +8,9 @@ Below are each location grouped together and sorted numerically.
 
 <div style="padding-bottom: 25px;">
  <img src="Position1/BOX_1_POS_1_1.png"/>
-<br>
+<br />
  <figcaption>Fig.1.1 - First throw, location number one.</figcaption>
-<br> 
+<br /> <br /> <br />
 </div>
 
 <div style="padding-bottom: 25px;">

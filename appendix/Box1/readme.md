@@ -2,22 +2,31 @@
 Each test were performed five times at three arbitrary locations. 
 Below are each location grouped together and sorted numerically.
 
-<h1> Images for position 1 </h1>
-<br> First throw at test location one <br>
+<div align="center">
 
+<h1> Images for position 1 </h1>
+
+<div style="padding-bottom: 25px;">
  <img src="Position1/BOX_1_POS_1_1.png"/>
  <figcaption>Fig.1.1 - First throw, location number one.</figcaption>
+</div>
 
- <img src="Position1/BOX_1_POS_1_2.png"/>
+<div style="padding-bottom: 25px;">
+ <img src="Position1/BOX_1_POS_1_1.png"/>
  <figcaption>Fig.1.2 - Second throw, location number one.</figcaption>
-
- <img src="Position1/BOX_1_POS_1_3.png"/>
-<br> Fourth throw at test location one <br>
-
- <img src="Position1/BOX_1_POS_1_4.png"/>
-<br> Fifth throw at test location one <br>
-
- <img src="Position1/BOX_1_POS_1_5.png"/>
+</div>
+<div style="padding-bottom: 25px;">
+ <img src="Position1/BOX_1_POS_1_1.png"/>
+ <figcaption>Fig.1.3 - Third throw, location number one.</figcaption>
+</div>
+<div style="padding-bottom: 25px;">
+ <img src="Position1/BOX_1_POS_1_1.png"/>
+ <figcaption>Fig.1.4 - Fourth throw, location number one.</figcaption>
+</div>
+<div style="padding-bottom: 25px;">
+ <img src="Position1/BOX_1_POS_1_1.png"/>
+ <figcaption>Fig.1.5 - Fifth throw, location number one.</figcaption>
+</div>
 
 <h1> Images for position 2 </h1>
 
@@ -34,3 +43,4 @@ Below are each location grouped together and sorted numerically.
  <img src="Position3/BOX_1_POS_3_3.png"/>
  <img src="Position3/BOX_1_POS_3_4.png"/>
  <img src="Position3/BOX_1_POS_3_5.png"/>
+</div>

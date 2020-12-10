@@ -1,5 +1,5 @@
-<h1>Overview</h1>
-Each test were performed five times at three arbitrary locations. 
+<h1>LEGO Sandcrawler test</h1>
+Each LEGO box were tested with five throws at three arbitrary locations.
 Below are each location grouped together and sorted numerically.
 
 <div align="center">

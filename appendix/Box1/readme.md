@@ -7,28 +7,40 @@ Below are each location grouped together and sorted numerically.
 <h1> Images for position 1 </h1>
 
 <div style="padding-bottom: 25px;">
- <img src="Position1/BOX_1_POS_1_1.png"/>
+<img src="Position1/BOX_1_POS_1_1.png"/>
 <br />
  <figcaption>Fig.1.1 - First throw, location number one.</figcaption>
 <br /> <br /> <br />
 </div>
 
 <div style="padding-bottom: 25px;">
- <img src="Position1/BOX_1_POS_1_1.png"/>
+<img src="Position1/BOX_1_POS_1_1.png"/>
+<br />
  <figcaption>Fig.1.2 - Second throw, location number one.</figcaption>
+<br /> <br /> <br />
 </div>
+
 <div style="padding-bottom: 25px;">
- <img src="Position1/BOX_1_POS_1_1.png"/>
+<img src="Position1/BOX_1_POS_1_1.png"/>
+<br />
  <figcaption>Fig.1.3 - Third throw, location number one.</figcaption>
+<br /> <br /> <br />
 </div>
+
 <div style="padding-bottom: 25px;">
- <img src="Position1/BOX_1_POS_1_1.png"/>
+<img src="Position1/BOX_1_POS_1_1.png"/>
+<br />
  <figcaption>Fig.1.4 - Fourth throw, location number one.</figcaption>
+<br /> <br /> <br />
 </div>
+
 <div style="padding-bottom: 25px;">
- <img src="Position1/BOX_1_POS_1_1.png"/>
+<img src="Position1/BOX_1_POS_1_1.png"/>
+<br />
  <figcaption>Fig.1.5 - Fifth throw, location number one.</figcaption>
+<br /> <br /> <br />
 </div>
+
 
 <h1> Images for position 2 </h1>
 

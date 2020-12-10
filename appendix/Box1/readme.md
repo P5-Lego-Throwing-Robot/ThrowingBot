@@ -14,28 +14,28 @@ Below are each location grouped together and sorted numerically.
 </div>
 
 <div style="padding-bottom: 25px;">
-<img src="Position1/BOX_1_POS_1_1.png"/>
+<img src="Position1/BOX_1_POS_1_2.png"/>
 <br />
  <figcaption>Fig.1.2 - Second throw, location number one.</figcaption>
 <br /> <br /> <br />
 </div>
 
 <div style="padding-bottom: 25px;">
-<img src="Position1/BOX_1_POS_1_1.png"/>
+<img src="Position1/BOX_1_POS_1_3.png"/>
 <br />
  <figcaption>Fig.1.3 - Third throw, location number one.</figcaption>
 <br /> <br /> <br />
 </div>
 
 <div style="padding-bottom: 25px;">
-<img src="Position1/BOX_1_POS_1_1.png"/>
+<img src="Position1/BOX_1_POS_1_4.png"/>
 <br />
  <figcaption>Fig.1.4 - Fourth throw, location number one.</figcaption>
 <br /> <br /> <br />
 </div>
 
 <div style="padding-bottom: 25px;">
-<img src="Position1/BOX_1_POS_1_1.png"/>
+<img src="Position1/BOX_1_POS_1_5.png"/>
 <br />
  <figcaption>Fig.1.5 - Fifth throw, location number one.</figcaption>
 <br /> <br /> <br />

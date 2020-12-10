@@ -1,0 +1,1 @@
+#Test results for Box type 1

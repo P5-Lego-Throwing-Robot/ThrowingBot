@@ -76,7 +76,7 @@ add_service_files(
 add_action_files(
   DIRECTORY
   action
-  
+
   FILES
   pick_option.action
   throwing.action
@@ -221,10 +221,6 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-add_executable(ludicrousThrow src/ludicrousThrow.cpp)
-add_dependencies(ludicrousThrow ${${PROJECT_NAME}_EXPORTED_TARGETS})
-target_link_libraries(ludicrousThrow ${catkin_LIBRARIES})
 
 add_executable(master_node src/master_node.cpp)
 add_dependencies(master_node ${${PROJECT_NAME}_EXPORTED_TARGETS})

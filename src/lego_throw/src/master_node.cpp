@@ -8,39 +8,66 @@
 #include <lego_throw/throwingAction.h>
 #include <actionlib/client/simple_action_client.h>
 #include <lego_throw/camera.h>
+#include <moveit_msgs/ExecuteTrajectoryAction.h>
 
 struct box_id {
     std::string box_id;
     float x;
     float y;
     float z;
+
+    std::string option;
 };
 
 // Global variables: 
 nlohmann::json order;
 std::vector<box_id> box_id_queue; 
+int trajectory_status = 3;
 
 
 // Callback function:
 bool box_id_callback(lego_throw::camera::Request  &req,
                      lego_throw::camera::Response &res){
-        
-        box_id temp_box;
 
-        temp_box.box_id = req.data;
-        temp_box.x = req.x;
-        temp_box.y = req.y;
-        temp_box.z = req.z;
-
-        if(order.contains(temp_box.box_id))
+        if(order.contains(req.data))
         {
-            std::cout << temp_box.box_id << " was added to the processing queue." << "\n";
-            box_id_queue.push_back(temp_box);
+
+            // Creating box:
+            box_id temp_box;
+
+            // Box center coordinates:
+            float x_c = req.x;
+            float y_c = req.y;
+            float z_c = req.z;
+
+            for (int i = 0; i < order[req.data]["bags"]; i++) 
+            {
+                
+                // Corner offset:
+                float x_offset = float(order[req.data]["item"][i]["OffsetX"]);
+                float y_offset = float(order[req.data]["item"][i]["OffsetY"]);
+                float z_offset = float(order[req.data]["item"][i]["OffsetZ"]);
+
+
+                // Box id:
+                temp_box.box_id = req.data + ", bag: " + std::to_string(i + 1);
+
+                // Throw coordinate:
+                temp_box.x = x_c + x_offset;
+                temp_box.y = y_c + y_offset;
+                temp_box.z = z_c + z_offset;
+
+                // Throw option:
+                temp_box.option = order[req.data]["item"][i]["option"];
+
+                box_id_queue.push_back(temp_box);
+            }
+
+            std::cout << req.data << " ("<< order[req.data]["name"] << ", "  << order[req.data]["bags"] << " bags, XYZ: (" << x_c << ", " << y_c << ", " << z_c << ")) was added to the processing queue." << "\n";
         }
-        
         else 
         {
-            std::cout << temp_box.box_id <<" was not found in the database." << "\n";
+            std::cout << req.data <<" was not found in the database." << "\n";
         }
 
         res.status = 0;
@@ -66,6 +93,14 @@ bool load_json(std::string path, nlohmann::json &json_object)
         return true;
     }
 
+// Update trajectory status to avoid overlapping trajectories:
+void execute_trajectory_callback(const moveit_msgs::ExecuteTrajectoryActionFeedbackConstPtr &msg)
+{
+    actionlib_msgs::GoalStatus feedback = msg->status;
+    trajectory_status = int(feedback.status);
+    //std::cout << "New trajectory status: " << trajectory_status << std::endl;
+}
+
 
 int main(int argc, char **argv)
 {
@@ -74,6 +109,9 @@ int main(int argc, char **argv)
 
     // Service server:
     ros::ServiceServer service = node_handle.advertiseService("camera", box_id_callback);
+
+    // Subscribe to feedback from trajectory executioner to avoid overlapping trajectories:
+    ros::Subscriber execute_sub = node_handle.subscribe("/execute_trajectory/feedback", 1, execute_trajectory_callback);
 
     // Action clients:
     actionlib::SimpleActionClient<lego_throw::pick_optionAction> picking_client("pick_option", true);
@@ -89,6 +127,9 @@ int main(int argc, char **argv)
     // State varaible:
     int state = 0;
 
+    // Loop rate:
+    ros::Rate loop_rate(10);
+
     // Action goals:
     lego_throw::pick_optionGoal pick_option_goal;
     lego_throw::throwingGoal throwing_goal;
@@ -103,7 +144,7 @@ int main(int argc, char **argv)
             {
                 std::cout << "---------------------\nSTARTING TO PROCESS -> " << box_id_queue[0].box_id << std::endl;
 
-                pick_option_goal.option = order[box_id_queue[0].box_id][0];
+                pick_option_goal.option = box_id_queue[0].option;
                 throwing_goal.x = box_id_queue[0].x;
                 throwing_goal.y = box_id_queue[0].y;
                 throwing_goal.z = box_id_queue[0].z;
@@ -113,8 +154,8 @@ int main(int argc, char **argv)
                 state = 1;
             }
             
-            // Sending picking goal if one has not been set before:
-            if (state == 1) 
+            // Sending picking goal if one has not been set before and the throwing node is finished (trajectory_status == 3):
+            if (state == 1 && trajectory_status == 3) 
             {
                 ROS_INFO("SENDING PICKING GOAL!");
                 picking_client.sendGoal(pick_option_goal);
@@ -162,10 +203,8 @@ int main(int argc, char **argv)
             }
         }
    
-        //ROS_INFO("TEST");
-
         ros::spinOnce();
-        ros::Rate(10).sleep();
+        loop_rate.sleep();
     }
     
 

@@ -3,16 +3,21 @@ Each test were performed five times at three arbitrary locations.
 Below are each location grouped together and sorted numerically.
 
 <h1> Images for position 1 </h1>
+<br> First throw at test location one <br>
+
  <img src="Position1/BOX_1_POS_1_1.png"/>
-<br> test location one, first throw. <br>
+<br> Second throw at test location one <br>
+
  <img src="Position1/BOX_1_POS_1_2.png"/>
-<br> test location one, second throw. <br>
+<br> Third throw at test location one <br>
+
  <img src="Position1/BOX_1_POS_1_3.png"/>
-<br> test location one, third throw. <br>
+<br> Fourth throw at test location one <br>
+
  <img src="Position1/BOX_1_POS_1_4.png"/>
-<br> test location one, fourth throw. <br>
+<br> Fifth throw at test location one <br>
+
  <img src="Position1/BOX_1_POS_1_5.png"/>
-<br> test location one, fifth throw. <br>
 
 <h1> Images for position 2 </h1>
 

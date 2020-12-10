@@ -70,6 +70,9 @@ bool pick_bag(std::string option)
     std_msgs::UInt16 state;
 
 
+    std::vector<double> ball_pos_init{3.75898814201355 , -1.8222559134112757, -1.3745268026935022, -1.5022662321673792, 1.5713986158370972, -1.0164840857135218};
+    std::vector<double> ball_pos{ 3.75980281829834, -1.890963379536764,-1.6076176802264612, -1.2274683157550257, 1.5723100900650024, -1.0200250784503382};
+
     std::vector<double> red_bag_init{3.5599920749664307, -1.7112701574908655, -1.423314396535055, -1.577430550252096, 1.555716872215271, -1.1531155745135706};
     std::vector<double> red_bag{3.5609023571014404, -1.7871363798724573, -1.7532079855548304, -1.1713998953448694, 1.5575990676879883, -1.1581695715533655};
 
@@ -94,6 +97,8 @@ bool pick_bag(std::string option)
         group->setJointValueTarget(blue_bag_init);
     if (option == "4")
         group->setJointValueTarget(yellow_bag_init);
+    if (option == "5")
+        group->setJointValueTarget(ball_pos_init);
     group->move();
 
     ROS_INFO("OPENING GRIPPER");
@@ -110,6 +115,8 @@ bool pick_bag(std::string option)
         group->setJointValueTarget(blue_bag);
     if (option == "4")
         group->setJointValueTarget(yellow_bag);
+    if (option == "5")
+        group->setJointValueTarget(ball_pos);
     group->move();
     //When the manipulator has reached the bag, close the gripper
     state.data = 0;
@@ -125,6 +132,8 @@ bool pick_bag(std::string option)
         group->setJointValueTarget(blue_bag_init);
     if (option == "4")
         group->setJointValueTarget(yellow_bag_init);
+    if (option == "5")
+        group->setJointValueTarget(ball_pos_init);
     group->move();
 
 

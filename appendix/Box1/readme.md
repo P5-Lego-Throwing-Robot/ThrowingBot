@@ -6,10 +6,10 @@ Below are each location grouped together and sorted numerically.
 <br> First throw at test location one <br>
 
  <img src="Position1/BOX_1_POS_1_1.png"/>
-<br> Second throw at test location one <br>
+ <figcaption>Fig.1.1 - First throw, location number one.</figcaption>
 
  <img src="Position1/BOX_1_POS_1_2.png"/>
-<br> Third throw at test location one <br>
+ <figcaption>Fig.1.2 - Second throw, location number one.</figcaption>
 
  <img src="Position1/BOX_1_POS_1_3.png"/>
 <br> Fourth throw at test location one <br>

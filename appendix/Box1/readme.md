@@ -14,8 +14,8 @@
 
 <h1> Images for position 3 </h1>
 
- <img src="Position3/BOX_1_POS_2_1.png"/>                   
- <img src="Position3/BOX_1_POS_2_2.png"/>
- <img src="Position3/BOX_1_POS_2_3.png"/>
- <img src="Position3/BOX_1_POS_2_4.png"/>
- <img src="Position3/BOX_1_POS_2_5.png"/>
+ <img src="Position3/BOX_1_POS_3_1.png"/>                   
+ <img src="Position3/BOX_1_POS_3_2.png"/>
+ <img src="Position3/BOX_1_POS_3_3.png"/>
+ <img src="Position3/BOX_1_POS_3_4.png"/>
+ <img src="Position3/BOX_1_POS_3_5.png"/>

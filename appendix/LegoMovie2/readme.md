@@ -67,22 +67,59 @@ Below are each location grouped together and sorted numerically.
 <br /> <br /> <br />
 </div>
 
+<div style="padding-bottom: 25px;">
+<img src="position2/BOX_3_POS_2_4.png"/>
+<br />
+ <figcaption>Fig.2.4 - Fourth throw, location number two.</figcaption>
+<br /> <br /> <br />
+</div>
+
+
+<div style="padding-bottom: 25px;">
+<img src="position2/BOX_3_POS_2_5.png"/>
+<br />
+ <figcaption>Fig.2.5 - Fifth throw, location number two.</figcaption>
+<br /> <br /> <br />
+</div>
+
+
 
 <div align="center">
 
 <h1> Images for throwing location three </h1>
 
+<div style="padding-bottom: 25px;">
+<img src="position3/BOX_3_POS_3_1.png"/>
+<br />
+ <figcaption>Fig.3.1 - First throw, location number three.</figcaption>
+<br /> <br /> <br />
+</div>
+
+<div style="padding-bottom: 25px;">
+<img src="position3/BOX_3_POS_3_2.png"/>
+<br />
+ <figcaption>Fig.3.2 - Second throw, location number three.</figcaption>
+<br /> <br /> <br />
+</div>
+
+<div style="padding-bottom: 25px;">
+<img src="position3/BOX_3_POS_3_3.png"/>
+<br />
+ <figcaption>Fig.3.3 - Third throw, location number three.</figcaption>
+<br /> <br /> <br />
+</div>
+
 
 <div style="padding-bottom: 25px;">
 <img src="position3/BOX_3_POS_3_4.png"/>
 <br />
- <figcaption>Fig.3.4 - First throw, location number three.</figcaption>
+ <figcaption>Fig.3.4 - Fourth throw, location number three.</figcaption>
 <br /> <br /> <br />
 </div>
 
 <div style="padding-bottom: 25px;">
 <img src="position3/BOX_3_POS_3_5.png"/>
 <br />
- <figcaption>Fig.3.5 - Second throw, location number three.</figcaption>
+ <figcaption>Fig.3.5 - Fifth throw, location number three.</figcaption>
 <br /> <br /> <br />
 </div>

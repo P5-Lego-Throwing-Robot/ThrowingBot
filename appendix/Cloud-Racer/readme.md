@@ -106,4 +106,11 @@ Below are each location grouped together and sorted numerically.
 <br /> <br /> <br />
 </div>
 
+<div style="padding-bottom: 25px;">
+<img src="position3/BOX_2_POS_3_5.png"/>
+<br />
+ <figcaption>Fig.3.5 - Fifth throw, location number three.</figcaption>
+<br /> <br /> <br />
+</div>
+
 

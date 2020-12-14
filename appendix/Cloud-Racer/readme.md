@@ -34,7 +34,7 @@ Below are each location grouped together and sorted numerically.
 </div>
 
 <div style="padding-bottom: 25px;">
-<img src="position1/BOX_2_POS_1_5.png"/>
+<img src="position1/BOX_2_POS_1_5 .png"/>
 <br />
  <figcaption>Fig.1.5 - Fifth throw, location number one.</figcaption>
 <br /> <br /> <br />

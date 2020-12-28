@@ -1,10 +1,10 @@
 <h1> Test appendix </h1>
 
 <h3> Videos </h3>
-Videos showcasing the laboratory solution can be seen in <a href="https://drive.google.com/drive/folders/1Sxk1JkQuaOvD9z1L5gSO6Yf9oyZ0uA43?usp=sharing" target="_blank">Google Drive</a>
-
+Videos showcasing the laboratory solution can be seen in <a href="https://drive.google.com/drive/folders/1Sxk1JkQuaOvD9z1L5gSO6Yf9oyZ0uA43?usp=sharing" target="_blank">Google Drive</a>:
+<br>
 <a href="https://drive.google.com/file/d/1GwJTsadVUrH_Q-2iQoINF2EjBI7Nsj9h/view?usp=sharing" target="_blank">Promo video</a>
-
+<br>
 <a href="https://drive.google.com/file/d/1DOoXYBpXOjhF6RfN_Xaj0Yox6oW_lzNt/view?usp=sharing" target="_blank">Test documentation video</a>
 
 <h3> Throwing LEGO bags</h3>

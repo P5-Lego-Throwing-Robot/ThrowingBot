@@ -1,5 +1,10 @@
 <h1> Test appendix </h1>
 
+<h3> Videos </h3>
+Videos showcasing the laboratory solution can be seen in [Google Drive](https://drive.google.com/drive/folders/1Sxk1JkQuaOvD9z1L5gSO6Yf9oyZ0uA43?usp=sharing "Google Drive").
+[Promo video](https://drive.google.com/file/d/1GwJTsadVUrH_Q-2iQoINF2EjBI7Nsj9h/view?usp=sharing "Promo video").
+[Test documentation video](https://drive.google.com/file/d/1DOoXYBpXOjhF6RfN_Xaj0Yox6oW_lzNt/view?usp=sharing "Test documentation video").
+
 <h3> Throwing LEGO bags</h3>
 Each LEGO box were tested using three arbitrary locations on the table. In each box-folder
 there are three sub-folders containing the pictures for the different locations.
